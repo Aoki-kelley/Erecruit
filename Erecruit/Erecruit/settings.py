@@ -37,7 +37,6 @@ CORS_ALLOW_METHODS = [
     'PUT',
     'VIEW',
 ]
-
 CORS_ALLOW_HEADERS = [
     'XMLHttpRequest',
     'X_FILENAME',
@@ -62,11 +61,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'user.apps.UserConfig',
+    # 'user.apps.UserConfig',
     'company',
     'industry',
     'comment',
-    # 'user',
+    'user',
     'rest_framework',  # 尝试
     'corsheaders',  # 跨域解决
 ]
