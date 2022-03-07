@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 import os
 from pathlib import Path
+from .celeryconfig import *
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-zg9yl5_&4l4otav4hv@fz$2mjqm%!$28@&59zp5!xt85%8%36!'
+SECRET_KEY = os.getenv('SECRET_KEY', 'secret%key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -27,7 +28,9 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 # 跨域解决
 CORS_ALLOW_CREDENTIALS = True
+
 CORS_ORIGIN_ALLOW_ALL = True
+
 CORS_ALLOW_METHODS = [
     'DELETE',
     'GET',
@@ -62,11 +65,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'user.apps.UserConfig',
+    'djcelery',
     'company',
     'industry',
     'comment',
-    # 'user',
+    'user',
     'rest_framework',  # 尝试
     'corsheaders',  # 跨域解决
 ]
@@ -75,7 +78,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -159,4 +162,26 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-SECRFET_KEY = os.getenv('SECRET_KEY', 'secret%key')
+# 邮件服务配置(ssl开启)
+EMAIL_BACKEND = 'django_smtp_ssl.SSLEmailBackend'
+
+EMAIL_HOST = 'smtp.163.com'
+
+EMAIL_PORT = 465
+
+EMAIL_USE_TLS = False
+
+EMAIL_USE_SSL = True
+
+EMAIL_HOST_USER = ''
+
+EMAIL_HOST_PASSWORD = ''
+
+EMAIL_FROM = '邮箱验证<>'
+
+# redis配置
+BROKER_BACKEND = 'redis'
+
+BROKER_URL = 'redis://localhost:6379/1'
+
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/2'

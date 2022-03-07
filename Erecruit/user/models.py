@@ -5,7 +5,6 @@ from django.db import models
 # Create your models here.
 
 
-
 # 用户
 from company.models import Profession
 from industry.models import Education
@@ -31,7 +30,7 @@ class Resume(models.Model):
                                ('man', "男"),
                                ('woman', "女"),
                            ))
-    majior = models.CharField(max_length=15, verbose_name="专业")
+    major = models.CharField(max_length=15, verbose_name="专业")
     education = models.ForeignKey(Education, on_delete=models.CASCADE, verbose_name="学历")
     wish_job = models.CharField(max_length=20, verbose_name="期望的工作")
     wish_city = models.CharField(max_length=20, verbose_name="期望的城市")
@@ -54,7 +53,7 @@ class VerificationCode(models.Model):
     action = models.CharField(max_length=10, verbose_name="用途",
                               choices=(
                                   ('register', "注册"),
-                                  ('find_back', "找回"),
+                                  ('login', "登录"),
                               ))
 
 
