@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50735
 File Encoding         : 65001
 
-Date: 2022-03-06 00:02:58
+Date: 2022-03-08 09:33:55
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -61,7 +61,7 @@ CREATE TABLE `auth_permission` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `auth_permission_content_type_id_codename_01ab375a_uniq` (`content_type_id`,`codename`),
   CONSTRAINT `auth_permission_content_type_id_2f476e4b_fk_django_co` FOREIGN KEY (`content_type_id`) REFERENCES `django_content_type` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=73 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=105 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Records of auth_permission
@@ -138,6 +138,38 @@ INSERT INTO `auth_permission` VALUES ('69', 'Can add work', '18', 'add_work');
 INSERT INTO `auth_permission` VALUES ('70', 'Can change work', '18', 'change_work');
 INSERT INTO `auth_permission` VALUES ('71', 'Can delete work', '18', 'delete_work');
 INSERT INTO `auth_permission` VALUES ('72', 'Can view work', '18', 'view_work');
+INSERT INTO `auth_permission` VALUES ('73', 'Can add crontab', '19', 'add_crontabschedule');
+INSERT INTO `auth_permission` VALUES ('74', 'Can change crontab', '19', 'change_crontabschedule');
+INSERT INTO `auth_permission` VALUES ('75', 'Can delete crontab', '19', 'delete_crontabschedule');
+INSERT INTO `auth_permission` VALUES ('76', 'Can view crontab', '19', 'view_crontabschedule');
+INSERT INTO `auth_permission` VALUES ('77', 'Can add interval', '20', 'add_intervalschedule');
+INSERT INTO `auth_permission` VALUES ('78', 'Can change interval', '20', 'change_intervalschedule');
+INSERT INTO `auth_permission` VALUES ('79', 'Can delete interval', '20', 'delete_intervalschedule');
+INSERT INTO `auth_permission` VALUES ('80', 'Can view interval', '20', 'view_intervalschedule');
+INSERT INTO `auth_permission` VALUES ('81', 'Can add periodic task', '21', 'add_periodictask');
+INSERT INTO `auth_permission` VALUES ('82', 'Can change periodic task', '21', 'change_periodictask');
+INSERT INTO `auth_permission` VALUES ('83', 'Can delete periodic task', '21', 'delete_periodictask');
+INSERT INTO `auth_permission` VALUES ('84', 'Can view periodic task', '21', 'view_periodictask');
+INSERT INTO `auth_permission` VALUES ('85', 'Can add periodic tasks', '22', 'add_periodictasks');
+INSERT INTO `auth_permission` VALUES ('86', 'Can change periodic tasks', '22', 'change_periodictasks');
+INSERT INTO `auth_permission` VALUES ('87', 'Can delete periodic tasks', '22', 'delete_periodictasks');
+INSERT INTO `auth_permission` VALUES ('88', 'Can view periodic tasks', '22', 'view_periodictasks');
+INSERT INTO `auth_permission` VALUES ('89', 'Can add task state', '23', 'add_taskmeta');
+INSERT INTO `auth_permission` VALUES ('90', 'Can change task state', '23', 'change_taskmeta');
+INSERT INTO `auth_permission` VALUES ('91', 'Can delete task state', '23', 'delete_taskmeta');
+INSERT INTO `auth_permission` VALUES ('92', 'Can view task state', '23', 'view_taskmeta');
+INSERT INTO `auth_permission` VALUES ('93', 'Can add saved group result', '24', 'add_tasksetmeta');
+INSERT INTO `auth_permission` VALUES ('94', 'Can change saved group result', '24', 'change_tasksetmeta');
+INSERT INTO `auth_permission` VALUES ('95', 'Can delete saved group result', '24', 'delete_tasksetmeta');
+INSERT INTO `auth_permission` VALUES ('96', 'Can view saved group result', '24', 'view_tasksetmeta');
+INSERT INTO `auth_permission` VALUES ('97', 'Can add task', '25', 'add_taskstate');
+INSERT INTO `auth_permission` VALUES ('98', 'Can change task', '25', 'change_taskstate');
+INSERT INTO `auth_permission` VALUES ('99', 'Can delete task', '25', 'delete_taskstate');
+INSERT INTO `auth_permission` VALUES ('100', 'Can view task', '25', 'view_taskstate');
+INSERT INTO `auth_permission` VALUES ('101', 'Can add worker', '26', 'add_workerstate');
+INSERT INTO `auth_permission` VALUES ('102', 'Can change worker', '26', 'change_workerstate');
+INSERT INTO `auth_permission` VALUES ('103', 'Can delete worker', '26', 'delete_workerstate');
+INSERT INTO `auth_permission` VALUES ('104', 'Can view worker', '26', 'view_workerstate');
 
 -- ----------------------------
 -- Table structure for auth_user
@@ -202,6 +234,47 @@ CREATE TABLE `auth_user_user_permissions` (
 -- ----------------------------
 
 -- ----------------------------
+-- Table structure for celery_taskmeta
+-- ----------------------------
+DROP TABLE IF EXISTS `celery_taskmeta`;
+CREATE TABLE `celery_taskmeta` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `task_id` varchar(255) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `result` longtext,
+  `date_done` datetime(6) NOT NULL,
+  `traceback` longtext,
+  `hidden` tinyint(1) NOT NULL,
+  `meta` longtext,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `task_id` (`task_id`),
+  KEY `celery_taskmeta_hidden_23fd02dc` (`hidden`)
+) ENGINE=InnoDB DEFAULT CHARSET=big5;
+
+-- ----------------------------
+-- Records of celery_taskmeta
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for celery_tasksetmeta
+-- ----------------------------
+DROP TABLE IF EXISTS `celery_tasksetmeta`;
+CREATE TABLE `celery_tasksetmeta` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `taskset_id` varchar(255) NOT NULL,
+  `result` longtext NOT NULL,
+  `date_done` datetime(6) NOT NULL,
+  `hidden` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `taskset_id` (`taskset_id`),
+  KEY `celery_tasksetmeta_hidden_593cfc24` (`hidden`)
+) ENGINE=InnoDB DEFAULT CHARSET=big5;
+
+-- ----------------------------
+-- Records of celery_tasksetmeta
+-- ----------------------------
+
+-- ----------------------------
 -- Table structure for comment_comment
 -- ----------------------------
 DROP TABLE IF EXISTS `comment_comment`;
@@ -226,42 +299,43 @@ DROP TABLE IF EXISTS `company_company`;
 CREATE TABLE `company_company` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(20) NOT NULL,
-  `detail` varchar(300) DEFAULT NULL,
+  `detail` varchar(5000) DEFAULT NULL,
   `applicant` int(11) NOT NULL,
+  `img` varchar(100) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=82 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of company_company
 -- ----------------------------
-INSERT INTO `company_company` VALUES ('51', '尚德机构', '学习是一种信仰!', '0');
-INSERT INTO `company_company` VALUES ('52', '薯片科技', '一站式企业服务平台，薯片集团员工6000余人，18大业态，为各大企业提供600多种服务项目。', '0');
-INSERT INTO `company_company` VALUES ('53', '环球易购', '成为跨境B2C电子商务模式的领航者', '0');
-INSERT INTO `company_company` VALUES ('54', '微盟', '人性化的管理， 年轻充满活力的团队， 广阔的发展前景', '0');
-INSERT INTO `company_company` VALUES ('55', '金证股份', '深圳市金证科技股份有限公司成立于1998年，2003年12月24日公司股票在上海证券交易所挂牌上市。', '0');
-INSERT INTO `company_company` VALUES ('56', '知网', '知识成就未来。', '0');
-INSERT INTO `company_company` VALUES ('57', '天鹅到家', '让家更美好', '0');
-INSERT INTO `company_company` VALUES ('58', '安硕信息（amarsoft）', '中国领先的金融资产风险管理整体解决方案提供商', '0');
-INSERT INTO `company_company` VALUES ('59', '乐融集团', '互联网电视开拓者，运营家庭美好生活', '0');
-INSERT INTO `company_company` VALUES ('60', '明源云', '地产生态链互联网+服务领航者', '0');
-INSERT INTO `company_company` VALUES ('61', '新浪网', '知名互联网公司', '0');
-INSERT INTO `company_company` VALUES ('62', '东方国信', '让数据改变工作与生活', '0');
-INSERT INTO `company_company` VALUES ('63', '自如网', '加入自如，让世界变得不一样~', '0');
-INSERT INTO `company_company` VALUES ('65', '美菜', '中国餐饮供应链杰出服务商', '0');
-INSERT INTO `company_company` VALUES ('67', '腾讯', '用户为本，科技向善', '0');
-INSERT INTO `company_company` VALUES ('69', '小米集团', '有些工作只是工作，有些工作却是你人生的使命， 那些工作会让你满怀热情、全心投入你的智慧和才能。', '0');
-INSERT INTO `company_company` VALUES ('70', '网易', '以匠心，致创新', '0');
-INSERT INTO `company_company` VALUES ('71', 'Shopee', '领航电商平台', '0');
-INSERT INTO `company_company` VALUES ('72', '百度', '用科技让复杂的世界更简单', '0');
-INSERT INTO `company_company` VALUES ('73', '北京麦田', '10000名专业经纪人的大规模集团型企业，麦田一直力争缔造卓越的房产服务组织。', '0');
-INSERT INTO `company_company` VALUES ('74', '滴滴', '公司管理扁平化，技术氛围特别融洽', '0');
-INSERT INTO `company_company` VALUES ('75', '北京京东世纪贸易有限公司', '科技引领生活！成为全球最值得信赖的企业！', '0');
-INSERT INTO `company_company` VALUES ('76', '哔哩哔哩', 'bilibili中国年轻人聚集的文化社区', '0');
-INSERT INTO `company_company` VALUES ('77', '拉勾集团', '专注互联网职业机会', '0');
-INSERT INTO `company_company` VALUES ('78', '商汤科技', '专注于计算机视觉和深度学习原创技术', '0');
-INSERT INTO `company_company` VALUES ('79', '贝壳', '用你的潜能，驱动“住”的无限可能', '0');
-INSERT INTO `company_company` VALUES ('80', '360', '我们的核心价值观：用户至上、持续创新、当责奋斗、开放协作、不断反思、诚信正直', '0');
-INSERT INTO `company_company` VALUES ('81', '微博', '微博是人们在线创作、分享和发现内容的中国领先社交媒体平台。', '0');
+INSERT INTO `company_company` VALUES ('51', '尚德机构', '学习是一种信仰!', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('52', '薯片科技', '一站式企业服务平台，薯片集团员工6000余人，18大业态，为各大企业提供600多种服务项目。', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('53', '环球易购', '成为跨境B2C电子商务模式的领航者', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('54', '微盟', '人性化的管理， 年轻充满活力的团队， 广阔的发展前景', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('55', '金证股份', '深圳市金证科技股份有限公司成立于1998年，2003年12月24日公司股票在上海证券交易所挂牌上市。', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('56', '知网', '知识成就未来。', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('57', '天鹅到家', '让家更美好', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('58', '安硕信息（amarsoft）', '中国领先的金融资产风险管理整体解决方案提供商', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('59', '乐融集团', '互联网电视开拓者，运营家庭美好生活', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('60', '明源云', '地产生态链互联网+服务领航者', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('61', '新浪网', '知名互联网公司', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('62', '东方国信', '让数据改变工作与生活', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('63', '自如网', '加入自如，让世界变得不一样~', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('65', '美菜', '中国餐饮供应链杰出服务商', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('67', '腾讯', '用户为本，科技向善', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('69', '小米集团', '有些工作只是工作，有些工作却是你人生的使命， 那些工作会让你满怀热情、全心投入你的智慧和才能。', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('70', '网易', '以匠心，致创新', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('71', 'Shopee', '领航电商平台', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('72', '百度', '用科技让复杂的世界更简单', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('73', '北京麦田', '10000名专业经纪人的大规模集团型企业，麦田一直力争缔造卓越的房产服务组织。', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('74', '滴滴', '公司管理扁平化，技术氛围特别融洽', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('75', '北京京东世纪贸易有限公司', '科技引领生活！成为全球最值得信赖的企业！', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('76', '哔哩哔哩', 'bilibili中国年轻人聚集的文化社区', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('77', '拉勾集团', '专注互联网职业机会', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('78', '商汤科技', '专注于计算机视觉和深度学习原创技术', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('79', '贝壳', '用你的潜能，驱动“住”的无限可能', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('80', '360', '我们的核心价值观：用户至上、持续创新、当责奋斗、开放协作、不断反思、诚信正直', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `company_company` VALUES ('81', '微博', '微博是人们在线创作、分享和发现内容的中国领先社交媒体平台。', '0', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
 
 -- ----------------------------
 -- Table structure for company_profession
@@ -977,7 +1051,7 @@ CREATE TABLE `django_content_type` (
   `model` varchar(100) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `django_content_type_app_label_model_76bd3d3b_uniq` (`app_label`,`model`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Records of django_content_type
@@ -990,6 +1064,14 @@ INSERT INTO `django_content_type` VALUES ('16', 'comment', 'comment');
 INSERT INTO `django_content_type` VALUES ('12', 'company', 'company');
 INSERT INTO `django_content_type` VALUES ('17', 'company', 'profession');
 INSERT INTO `django_content_type` VALUES ('5', 'contenttypes', 'contenttype');
+INSERT INTO `django_content_type` VALUES ('19', 'djcelery', 'crontabschedule');
+INSERT INTO `django_content_type` VALUES ('20', 'djcelery', 'intervalschedule');
+INSERT INTO `django_content_type` VALUES ('21', 'djcelery', 'periodictask');
+INSERT INTO `django_content_type` VALUES ('22', 'djcelery', 'periodictasks');
+INSERT INTO `django_content_type` VALUES ('23', 'djcelery', 'taskmeta');
+INSERT INTO `django_content_type` VALUES ('24', 'djcelery', 'tasksetmeta');
+INSERT INTO `django_content_type` VALUES ('25', 'djcelery', 'taskstate');
+INSERT INTO `django_content_type` VALUES ('26', 'djcelery', 'workerstate');
 INSERT INTO `django_content_type` VALUES ('13', 'industry', 'education');
 INSERT INTO `django_content_type` VALUES ('14', 'industry', 'industry');
 INSERT INTO `django_content_type` VALUES ('15', 'industry', 'profession');
@@ -1011,7 +1093,7 @@ CREATE TABLE `django_migrations` (
   `name` varchar(255) NOT NULL,
   `applied` datetime(6) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Records of django_migrations
@@ -1043,6 +1125,12 @@ INSERT INTO `django_migrations` VALUES ('24', 'user', '0002_auto_20220305_2123',
 INSERT INTO `django_migrations` VALUES ('25', 'industry', '0002_auto_20220305_2123', '2022-03-05 21:25:33.560586');
 INSERT INTO `django_migrations` VALUES ('26', 'industry', '0002_work_name', '2022-03-05 21:55:22.561863');
 INSERT INTO `django_migrations` VALUES ('27', 'industry', '0003_alter_work_name', '2022-03-05 22:19:40.217289');
+INSERT INTO `django_migrations` VALUES ('28', 'company', '0002_company_img', '2022-03-08 08:50:03.017618');
+INSERT INTO `django_migrations` VALUES ('29', 'djcelery', '0001_initial', '2022-03-08 08:51:52.219212');
+INSERT INTO `django_migrations` VALUES ('30', 'djcelery', '0002_auto_20220307_2348', '2022-03-08 08:51:52.431732');
+INSERT INTO `django_migrations` VALUES ('31', 'company', '0003_alter_company_detail', '2022-03-08 08:56:57.522186');
+INSERT INTO `django_migrations` VALUES ('32', 'djcelery', '0002_auto_20220307_2331', '2022-03-08 08:56:57.723334');
+INSERT INTO `django_migrations` VALUES ('33', 'industry', '0002_alter_industry_work1', '2022-03-08 08:56:57.736337');
 
 -- ----------------------------
 -- Table structure for django_session
@@ -1058,6 +1146,137 @@ CREATE TABLE `django_session` (
 
 -- ----------------------------
 -- Records of django_session
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for djcelery_crontabschedule
+-- ----------------------------
+DROP TABLE IF EXISTS `djcelery_crontabschedule`;
+CREATE TABLE `djcelery_crontabschedule` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `minute` varchar(64) NOT NULL,
+  `hour` varchar(64) NOT NULL,
+  `day_of_week` varchar(64) NOT NULL,
+  `day_of_month` varchar(64) NOT NULL,
+  `month_of_year` varchar(64) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=big5;
+
+-- ----------------------------
+-- Records of djcelery_crontabschedule
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for djcelery_intervalschedule
+-- ----------------------------
+DROP TABLE IF EXISTS `djcelery_intervalschedule`;
+CREATE TABLE `djcelery_intervalschedule` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `every` int(11) NOT NULL,
+  `period` varchar(24) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=big5;
+
+-- ----------------------------
+-- Records of djcelery_intervalschedule
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for djcelery_periodictask
+-- ----------------------------
+DROP TABLE IF EXISTS `djcelery_periodictask`;
+CREATE TABLE `djcelery_periodictask` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(200) NOT NULL,
+  `task` varchar(200) NOT NULL,
+  `args` longtext NOT NULL,
+  `kwargs` longtext NOT NULL,
+  `queue` varchar(200) DEFAULT NULL,
+  `exchange` varchar(200) DEFAULT NULL,
+  `routing_key` varchar(200) DEFAULT NULL,
+  `expires` datetime(6) DEFAULT NULL,
+  `enabled` tinyint(1) NOT NULL,
+  `last_run_at` datetime(6) DEFAULT NULL,
+  `total_run_count` int(10) unsigned NOT NULL,
+  `date_changed` datetime(6) NOT NULL,
+  `description` longtext NOT NULL,
+  `crontab_id` bigint(20) DEFAULT NULL,
+  `interval_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  KEY `djcelery_periodictask_crontab_id_75609bab_fk` (`crontab_id`),
+  KEY `djcelery_periodictask_interval_id_b426ab02_fk` (`interval_id`),
+  CONSTRAINT `djcelery_periodictask_crontab_id_75609bab_fk` FOREIGN KEY (`crontab_id`) REFERENCES `djcelery_crontabschedule` (`id`),
+  CONSTRAINT `djcelery_periodictask_interval_id_b426ab02_fk` FOREIGN KEY (`interval_id`) REFERENCES `djcelery_intervalschedule` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=big5;
+
+-- ----------------------------
+-- Records of djcelery_periodictask
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for djcelery_periodictasks
+-- ----------------------------
+DROP TABLE IF EXISTS `djcelery_periodictasks`;
+CREATE TABLE `djcelery_periodictasks` (
+  `ident` smallint(6) NOT NULL,
+  `last_update` datetime(6) NOT NULL,
+  PRIMARY KEY (`ident`)
+) ENGINE=InnoDB DEFAULT CHARSET=big5;
+
+-- ----------------------------
+-- Records of djcelery_periodictasks
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for djcelery_taskstate
+-- ----------------------------
+DROP TABLE IF EXISTS `djcelery_taskstate`;
+CREATE TABLE `djcelery_taskstate` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `state` varchar(64) NOT NULL,
+  `task_id` varchar(36) NOT NULL,
+  `name` varchar(200) DEFAULT NULL,
+  `tstamp` datetime(6) NOT NULL,
+  `args` longtext,
+  `kwargs` longtext,
+  `eta` datetime(6) DEFAULT NULL,
+  `expires` datetime(6) DEFAULT NULL,
+  `result` longtext,
+  `traceback` longtext,
+  `runtime` double DEFAULT NULL,
+  `retries` int(11) NOT NULL,
+  `hidden` tinyint(1) NOT NULL,
+  `worker_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `task_id` (`task_id`),
+  KEY `djcelery_taskstate_state_53543be4` (`state`),
+  KEY `djcelery_taskstate_name_8af9eded` (`name`),
+  KEY `djcelery_taskstate_tstamp_4c3f93a1` (`tstamp`),
+  KEY `djcelery_taskstate_hidden_c3905e57` (`hidden`),
+  KEY `djcelery_taskstate_worker_id_f7f57a05_fk` (`worker_id`),
+  CONSTRAINT `djcelery_taskstate_worker_id_f7f57a05_fk` FOREIGN KEY (`worker_id`) REFERENCES `djcelery_workerstate` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=big5;
+
+-- ----------------------------
+-- Records of djcelery_taskstate
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for djcelery_workerstate
+-- ----------------------------
+DROP TABLE IF EXISTS `djcelery_workerstate`;
+CREATE TABLE `djcelery_workerstate` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `hostname` varchar(255) NOT NULL,
+  `last_heartbeat` datetime(6) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `hostname` (`hostname`),
+  KEY `djcelery_workerstate_last_heartbeat_4539b544` (`last_heartbeat`)
+) ENGINE=InnoDB DEFAULT CHARSET=big5;
+
+-- ----------------------------
+-- Records of djcelery_workerstate
 -- ----------------------------
 
 -- ----------------------------
@@ -1088,21 +1307,21 @@ DROP TABLE IF EXISTS `industry_industry`;
 CREATE TABLE `industry_industry` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(20) NOT NULL,
-  `work1` varchar(100) DEFAULT NULL,
+  `work1` varchar(600) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of industry_industry
 -- ----------------------------
-INSERT INTO `industry_industry` VALUES ('1', '技术', 'Java|PHP|C++|区块链|Android iOS|数据挖掘|深度学习|自然语言处理|机器学习');
-INSERT INTO `industry_industry` VALUES ('2', '产品', '产品总监|产品经理|数据产品经理|游戏策划');
-INSERT INTO `industry_industry` VALUES ('3', '设计', 'UI设计师|交互设计|网页设计师|平面设计师|视觉设计师');
-INSERT INTO `industry_industry` VALUES ('4', '运营', '新媒体运营|编辑|数据运营|运营总监|COO');
-INSERT INTO `industry_industry` VALUES ('5', '市场', '市场营销|市场推广|市场策划|政府关系|广告文案|广告投放|市场推广|SEO|SEM');
-INSERT INTO `industry_industry` VALUES ('6', '销售', '销售专员|销售经理|销售总监|大客户代表|客户经理|电话销售');
-INSERT INTO `industry_industry` VALUES ('7', '职能', 'HR|行政|财务|审计');
-INSERT INTO `industry_industry` VALUES ('8', '游戏', '小游戏开发|U3D|游戏策划|游戏运营');
+INSERT INTO `industry_industry` VALUES ('1', '技术', 'PHP+数据挖掘+搜索算法+精准推荐+C+C%23+全栈工程师+.NET+Hadoop+Python+Delphi+VB+Perl+Ruby+Node.js+Go+ASP+Shell+区块链+后端开发其它移动开发HTML5+Android+iOS+WP+移动开发其它前端开发web前端+Flash+html5+JavaScript+U3D+COCOS2D-X+前端开发其它人工智能深度学习+机器学习+图像处理+图像识别+语音识别+机器视觉+算法工程师+自然语言处理测试测试工程师+自动化测试+功能测试+性能测试+测试开发+游戏测试+白盒测试+灰盒测试+黑盒测试+手机测试+硬件测试+测试经理+测试其它');
+INSERT INTO `industry_industry` VALUES ('2', '产品', '产品经理+网页产品经理+移动产品经理+产品助理+数据产品经理+电商产品经理+游戏策划+产品实习生产品设计师网页产品设计师+无线产品设计师高端职位产品部经理+产品总监+游戏制作人');
+INSERT INTO `industry_industry` VALUES ('3', '设计', '视觉设计师+网页设计师+Flash设计师+APP设计师+UI设计师+平面设计师+美术设计师（2D%2F3D）+广告设计师+多媒体设计师+原画师+游戏特效+游戏界面设计师+游戏场景+游戏角色+游戏动作交互设计交互设计师+无线交互设计师+网页交互设计师+硬件交互设计师用户研究数据分析师+用户研究员+游戏数值策划高端职位设计经理%2F主管+设计总监+视觉设计经理%2F主管+视觉设计总监+交互设计经理%2F主管+交互设计总监+用户研究经理%2F主管+用户研究总监');
+INSERT INTO `industry_industry` VALUES ('4', '运营', '用户运营+产品运营+数据运营+内容运营+活动运营+商家运营+品类运营+游戏运营+网络推广+运营专员+网店运营+新媒体运营+海外运营+运营经理编辑副主编+内容编辑+文案策划+记者客服售前咨询+售后客服+淘宝客服+客服经理高端职位主编+运营总监+COO+客服总监');
+INSERT INTO `industry_industry` VALUES ('5', '市场', '市场营销+市场策划+市场顾问+商务渠道+商业数据分析+活动策划+网络营销+海外市场+商务专员媒介%2F公关政府关系+品牌公关+广告协调+媒介投放+媒介合作+媒介顾问品牌%2F广告广告创意+广告制作+广告文案+广告投放+广告定价+广告专员+品牌合作+品牌策划+品牌专员+美术指导渠道%2F推广市场推广+渠道推广+SEO+SEM高端职位策划经理+媒介经理+市场总监+公关总监+媒介总监+创意总监');
+INSERT INTO `industry_industry` VALUES ('6', '销售', '销售专员+销售顾问+销售经理+客户代表+大客户代表+客户经理+商务拓展+渠道销售+代理商销售+电话销售+广告销售+信用卡销售+保险销售+销售工程师+商务渠道+其他销售销售管理销售总监+商务总监+区域总监+城市经理+团队经理+销售VP+商务主管+其他销售管理职位');
+INSERT INTO `industry_industry` VALUES ('7', '职能', '人力资源+招聘+HRBP+人事%2FHR+培训经理+薪资福利经理+绩效考核经理+员工关系行政助理+前台+行政+总助+文秘财务会计+出纳+财务+结算+税务+审计+风控法务法务+律师+专利高端职位行政总监%2F经理+财务总监%2F经理');
+INSERT INTO `industry_industry` VALUES ('8', '游戏', 'H5游戏开发+小游戏开发+游戏后端开发+C%2B%2B游戏开发+FLASH+COCOS2D-X+U3D+游戏测试产品策划游戏制作人+游戏产品经理+游戏项目经理+游戏策划+剧情设计+游戏文案设计游戏动画+游戏原画+游戏界面+游戏场景+游戏角色+游戏动作+游戏动效+游戏美工运营%2F推广游戏运营+游戏编辑+游戏推广+手游推广+页游推广其他游戏主播+游戏陪练+游戏体验+电竞主持+电竞讲师');
 
 -- ----------------------------
 -- Table structure for industry_work
@@ -1116,57 +1335,193 @@ CREATE TABLE `industry_work` (
   PRIMARY KEY (`id`),
   KEY `industry_work_industry_id_ccd763ac_fk_industry_industry_id` (`industry_id`),
   CONSTRAINT `industry_work_industry_id_ccd763ac_fk_industry_industry_id` FOREIGN KEY (`industry_id`) REFERENCES `industry_industry` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=55 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=268 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of industry_work
 -- ----------------------------
 INSERT INTO `industry_work` VALUES ('9', '0', '1', 'Java');
-INSERT INTO `industry_work` VALUES ('10', '0', '1', 'PHP');
 INSERT INTO `industry_work` VALUES ('11', '0', '1', 'C++');
-INSERT INTO `industry_work` VALUES ('12', '0', '1', '区块链');
 INSERT INTO `industry_work` VALUES ('13', '0', '1', 'Android iOS');
-INSERT INTO `industry_work` VALUES ('14', '0', '1', '数据挖掘');
 INSERT INTO `industry_work` VALUES ('15', '0', '1', '深度学习');
 INSERT INTO `industry_work` VALUES ('16', '0', '1', '自然语言处理');
-INSERT INTO `industry_work` VALUES ('17', '0', '1', '机器学习');
-INSERT INTO `industry_work` VALUES ('18', '0', '2', '产品总监');
-INSERT INTO `industry_work` VALUES ('19', '0', '2', '产品经理');
-INSERT INTO `industry_work` VALUES ('20', '0', '2', '数据产品经理');
-INSERT INTO `industry_work` VALUES ('21', '0', '2', '游戏策划');
-INSERT INTO `industry_work` VALUES ('22', '0', '3', 'UI设计师');
 INSERT INTO `industry_work` VALUES ('23', '0', '3', '交互设计');
-INSERT INTO `industry_work` VALUES ('24', '0', '3', '网页设计师');
-INSERT INTO `industry_work` VALUES ('25', '0', '3', '平面设计师');
-INSERT INTO `industry_work` VALUES ('26', '0', '3', '视觉设计师');
-INSERT INTO `industry_work` VALUES ('27', '0', '4', '新媒体运营');
 INSERT INTO `industry_work` VALUES ('28', '0', '4', '编辑');
-INSERT INTO `industry_work` VALUES ('29', '0', '4', '数据运营');
-INSERT INTO `industry_work` VALUES ('30', '0', '4', '运营总监');
-INSERT INTO `industry_work` VALUES ('31', '0', '4', 'COO');
-INSERT INTO `industry_work` VALUES ('32', '0', '5', '市场营销');
-INSERT INTO `industry_work` VALUES ('33', '0', '5', '市场推广');
-INSERT INTO `industry_work` VALUES ('34', '0', '5', '市场策划');
 INSERT INTO `industry_work` VALUES ('35', '0', '5', '政府关系');
-INSERT INTO `industry_work` VALUES ('36', '0', '5', '广告文案');
-INSERT INTO `industry_work` VALUES ('37', '0', '5', '广告投放');
-INSERT INTO `industry_work` VALUES ('38', '0', '5', '市场推广');
-INSERT INTO `industry_work` VALUES ('39', '0', '5', 'SEO');
 INSERT INTO `industry_work` VALUES ('40', '0', '5', 'SEM');
-INSERT INTO `industry_work` VALUES ('41', '0', '6', '销售专员');
-INSERT INTO `industry_work` VALUES ('42', '0', '6', '销售经理');
 INSERT INTO `industry_work` VALUES ('43', '0', '6', '销售总监');
-INSERT INTO `industry_work` VALUES ('44', '0', '6', '大客户代表');
-INSERT INTO `industry_work` VALUES ('45', '0', '6', '客户经理');
-INSERT INTO `industry_work` VALUES ('46', '0', '6', '电话销售');
 INSERT INTO `industry_work` VALUES ('47', '0', '7', 'HR');
-INSERT INTO `industry_work` VALUES ('48', '0', '7', '行政');
-INSERT INTO `industry_work` VALUES ('49', '0', '7', '财务');
-INSERT INTO `industry_work` VALUES ('50', '0', '7', '审计');
-INSERT INTO `industry_work` VALUES ('51', '0', '8', '小游戏开发');
-INSERT INTO `industry_work` VALUES ('52', '0', '8', 'U3D');
-INSERT INTO `industry_work` VALUES ('53', '0', '8', '游戏策划');
-INSERT INTO `industry_work` VALUES ('54', '0', '8', '游戏运营');
+INSERT INTO `industry_work` VALUES ('57', '0', '1', '搜索算法');
+INSERT INTO `industry_work` VALUES ('58', '0', '1', '精准推荐');
+INSERT INTO `industry_work` VALUES ('59', '0', '1', 'C');
+INSERT INTO `industry_work` VALUES ('60', '0', '1', 'C%23');
+INSERT INTO `industry_work` VALUES ('61', '0', '1', '全栈工程师');
+INSERT INTO `industry_work` VALUES ('62', '0', '1', '.NET');
+INSERT INTO `industry_work` VALUES ('63', '0', '1', 'Hadoop');
+INSERT INTO `industry_work` VALUES ('64', '0', '1', 'Python');
+INSERT INTO `industry_work` VALUES ('65', '0', '1', 'Delphi');
+INSERT INTO `industry_work` VALUES ('66', '0', '1', 'VB');
+INSERT INTO `industry_work` VALUES ('67', '0', '1', 'Perl');
+INSERT INTO `industry_work` VALUES ('68', '0', '1', 'Ruby');
+INSERT INTO `industry_work` VALUES ('69', '0', '1', 'Node.js');
+INSERT INTO `industry_work` VALUES ('70', '0', '1', 'Go');
+INSERT INTO `industry_work` VALUES ('71', '0', '1', 'ASP');
+INSERT INTO `industry_work` VALUES ('72', '0', '1', 'Shell');
+INSERT INTO `industry_work` VALUES ('74', '0', '1', '后端开发其它移动开发HTML5');
+INSERT INTO `industry_work` VALUES ('75', '0', '1', 'Android');
+INSERT INTO `industry_work` VALUES ('76', '0', '1', 'iOS');
+INSERT INTO `industry_work` VALUES ('77', '0', '1', 'WP');
+INSERT INTO `industry_work` VALUES ('78', '0', '1', '移动开发其它前端开发web前端');
+INSERT INTO `industry_work` VALUES ('79', '0', '1', 'Flash');
+INSERT INTO `industry_work` VALUES ('80', '0', '1', 'html5');
+INSERT INTO `industry_work` VALUES ('81', '0', '1', 'JavaScript');
+INSERT INTO `industry_work` VALUES ('84', '0', '1', '前端开发其它人工智能深度学习');
+INSERT INTO `industry_work` VALUES ('86', '0', '1', '图像处理');
+INSERT INTO `industry_work` VALUES ('87', '0', '1', '图像识别');
+INSERT INTO `industry_work` VALUES ('88', '0', '1', '语音识别');
+INSERT INTO `industry_work` VALUES ('89', '0', '1', '机器视觉');
+INSERT INTO `industry_work` VALUES ('90', '0', '1', '算法工程师');
+INSERT INTO `industry_work` VALUES ('91', '0', '1', '自然语言处理测试测试工程师');
+INSERT INTO `industry_work` VALUES ('92', '0', '1', '自动化测试');
+INSERT INTO `industry_work` VALUES ('93', '0', '1', '功能测试');
+INSERT INTO `industry_work` VALUES ('94', '0', '1', '性能测试');
+INSERT INTO `industry_work` VALUES ('95', '0', '1', '测试开发');
+INSERT INTO `industry_work` VALUES ('96', '0', '1', '游戏测试');
+INSERT INTO `industry_work` VALUES ('97', '0', '1', '白盒测试');
+INSERT INTO `industry_work` VALUES ('98', '0', '1', '灰盒测试');
+INSERT INTO `industry_work` VALUES ('99', '0', '1', '黑盒测试');
+INSERT INTO `industry_work` VALUES ('100', '0', '1', '手机测试');
+INSERT INTO `industry_work` VALUES ('101', '0', '1', '硬件测试');
+INSERT INTO `industry_work` VALUES ('102', '0', '1', '测试经理');
+INSERT INTO `industry_work` VALUES ('103', '0', '1', '测试其它');
+INSERT INTO `industry_work` VALUES ('105', '0', '2', '网页产品经理');
+INSERT INTO `industry_work` VALUES ('106', '0', '2', '移动产品经理');
+INSERT INTO `industry_work` VALUES ('107', '0', '2', '产品助理');
+INSERT INTO `industry_work` VALUES ('109', '0', '2', '电商产品经理');
+INSERT INTO `industry_work` VALUES ('111', '0', '2', '产品实习生产品设计师网页产品设计师');
+INSERT INTO `industry_work` VALUES ('112', '0', '2', '无线产品设计师高端职位产品部经理');
+INSERT INTO `industry_work` VALUES ('114', '0', '2', '游戏制作人');
+INSERT INTO `industry_work` VALUES ('117', '0', '3', 'Flash设计师');
+INSERT INTO `industry_work` VALUES ('118', '0', '3', 'APP设计师');
+INSERT INTO `industry_work` VALUES ('121', '0', '3', '美术设计师（2D%2F3D）');
+INSERT INTO `industry_work` VALUES ('122', '0', '3', '广告设计师');
+INSERT INTO `industry_work` VALUES ('123', '0', '3', '多媒体设计师');
+INSERT INTO `industry_work` VALUES ('124', '0', '3', '原画师');
+INSERT INTO `industry_work` VALUES ('125', '0', '3', '游戏特效');
+INSERT INTO `industry_work` VALUES ('126', '0', '3', '游戏界面设计师');
+INSERT INTO `industry_work` VALUES ('129', '0', '3', '游戏动作交互设计交互设计师');
+INSERT INTO `industry_work` VALUES ('130', '0', '3', '无线交互设计师');
+INSERT INTO `industry_work` VALUES ('131', '0', '3', '网页交互设计师');
+INSERT INTO `industry_work` VALUES ('132', '0', '3', '硬件交互设计师用户研究数据分析师');
+INSERT INTO `industry_work` VALUES ('133', '0', '3', '用户研究员');
+INSERT INTO `industry_work` VALUES ('134', '0', '3', '游戏数值策划高端职位设计经理%2F主管');
+INSERT INTO `industry_work` VALUES ('135', '0', '3', '设计总监');
+INSERT INTO `industry_work` VALUES ('136', '0', '3', '视觉设计经理%2F主管');
+INSERT INTO `industry_work` VALUES ('137', '0', '3', '视觉设计总监');
+INSERT INTO `industry_work` VALUES ('138', '0', '3', '交互设计经理%2F主管');
+INSERT INTO `industry_work` VALUES ('139', '0', '3', '交互设计总监');
+INSERT INTO `industry_work` VALUES ('140', '0', '3', '用户研究经理%2F主管');
+INSERT INTO `industry_work` VALUES ('141', '0', '3', '用户研究总监');
+INSERT INTO `industry_work` VALUES ('142', '0', '4', '用户运营');
+INSERT INTO `industry_work` VALUES ('143', '0', '4', '产品运营');
+INSERT INTO `industry_work` VALUES ('145', '0', '4', '内容运营');
+INSERT INTO `industry_work` VALUES ('146', '0', '4', '活动运营');
+INSERT INTO `industry_work` VALUES ('147', '0', '4', '商家运营');
+INSERT INTO `industry_work` VALUES ('148', '0', '4', '品类运营');
+INSERT INTO `industry_work` VALUES ('150', '0', '4', '网络推广');
+INSERT INTO `industry_work` VALUES ('151', '0', '4', '运营专员');
+INSERT INTO `industry_work` VALUES ('152', '0', '4', '网店运营');
+INSERT INTO `industry_work` VALUES ('154', '0', '4', '海外运营');
+INSERT INTO `industry_work` VALUES ('155', '0', '4', '运营经理编辑副主编');
+INSERT INTO `industry_work` VALUES ('156', '0', '4', '内容编辑');
+INSERT INTO `industry_work` VALUES ('157', '0', '4', '文案策划');
+INSERT INTO `industry_work` VALUES ('158', '0', '4', '记者客服售前咨询');
+INSERT INTO `industry_work` VALUES ('159', '0', '4', '售后客服');
+INSERT INTO `industry_work` VALUES ('160', '0', '4', '淘宝客服');
+INSERT INTO `industry_work` VALUES ('161', '0', '4', '客服经理高端职位主编');
+INSERT INTO `industry_work` VALUES ('164', '0', '4', '客服总监');
+INSERT INTO `industry_work` VALUES ('167', '0', '5', '市场顾问');
+INSERT INTO `industry_work` VALUES ('169', '0', '5', '商业数据分析');
+INSERT INTO `industry_work` VALUES ('170', '0', '5', '活动策划');
+INSERT INTO `industry_work` VALUES ('171', '0', '5', '网络营销');
+INSERT INTO `industry_work` VALUES ('172', '0', '5', '海外市场');
+INSERT INTO `industry_work` VALUES ('173', '0', '5', '商务专员媒介%2F公关政府关系');
+INSERT INTO `industry_work` VALUES ('174', '0', '5', '品牌公关');
+INSERT INTO `industry_work` VALUES ('175', '0', '5', '广告协调');
+INSERT INTO `industry_work` VALUES ('176', '0', '5', '媒介投放');
+INSERT INTO `industry_work` VALUES ('177', '0', '5', '媒介合作');
+INSERT INTO `industry_work` VALUES ('178', '0', '5', '媒介顾问品牌%2F广告广告创意');
+INSERT INTO `industry_work` VALUES ('179', '0', '5', '广告制作');
+INSERT INTO `industry_work` VALUES ('182', '0', '5', '广告定价');
+INSERT INTO `industry_work` VALUES ('183', '0', '5', '广告专员');
+INSERT INTO `industry_work` VALUES ('184', '0', '5', '品牌合作');
+INSERT INTO `industry_work` VALUES ('185', '0', '5', '品牌策划');
+INSERT INTO `industry_work` VALUES ('186', '0', '5', '品牌专员');
+INSERT INTO `industry_work` VALUES ('187', '0', '5', '美术指导渠道%2F推广市场推广');
+INSERT INTO `industry_work` VALUES ('188', '0', '5', '渠道推广');
+INSERT INTO `industry_work` VALUES ('190', '0', '5', 'SEM高端职位策划经理');
+INSERT INTO `industry_work` VALUES ('191', '0', '5', '媒介经理');
+INSERT INTO `industry_work` VALUES ('192', '0', '5', '市场总监');
+INSERT INTO `industry_work` VALUES ('193', '0', '5', '公关总监');
+INSERT INTO `industry_work` VALUES ('194', '0', '5', '媒介总监');
+INSERT INTO `industry_work` VALUES ('195', '0', '5', '创意总监');
+INSERT INTO `industry_work` VALUES ('197', '0', '6', '销售顾问');
+INSERT INTO `industry_work` VALUES ('199', '0', '6', '客户代表');
+INSERT INTO `industry_work` VALUES ('202', '0', '6', '商务拓展');
+INSERT INTO `industry_work` VALUES ('203', '0', '6', '渠道销售');
+INSERT INTO `industry_work` VALUES ('204', '0', '6', '代理商销售');
+INSERT INTO `industry_work` VALUES ('206', '0', '6', '广告销售');
+INSERT INTO `industry_work` VALUES ('207', '0', '6', '信用卡销售');
+INSERT INTO `industry_work` VALUES ('208', '0', '6', '保险销售');
+INSERT INTO `industry_work` VALUES ('209', '0', '6', '销售工程师');
+INSERT INTO `industry_work` VALUES ('211', '0', '6', '其他销售销售管理销售总监');
+INSERT INTO `industry_work` VALUES ('212', '0', '6', '商务总监');
+INSERT INTO `industry_work` VALUES ('213', '0', '6', '区域总监');
+INSERT INTO `industry_work` VALUES ('214', '0', '6', '城市经理');
+INSERT INTO `industry_work` VALUES ('215', '0', '6', '团队经理');
+INSERT INTO `industry_work` VALUES ('216', '0', '6', '销售VP');
+INSERT INTO `industry_work` VALUES ('217', '0', '6', '商务主管');
+INSERT INTO `industry_work` VALUES ('218', '0', '6', '其他销售管理职位');
+INSERT INTO `industry_work` VALUES ('219', '0', '7', '人力资源');
+INSERT INTO `industry_work` VALUES ('220', '0', '7', '招聘');
+INSERT INTO `industry_work` VALUES ('221', '0', '7', 'HRBP');
+INSERT INTO `industry_work` VALUES ('222', '0', '7', '人事%2FHR');
+INSERT INTO `industry_work` VALUES ('223', '0', '7', '培训经理');
+INSERT INTO `industry_work` VALUES ('224', '0', '7', '薪资福利经理');
+INSERT INTO `industry_work` VALUES ('225', '0', '7', '绩效考核经理');
+INSERT INTO `industry_work` VALUES ('226', '0', '7', '员工关系行政助理');
+INSERT INTO `industry_work` VALUES ('227', '0', '7', '前台');
+INSERT INTO `industry_work` VALUES ('229', '0', '7', '总助');
+INSERT INTO `industry_work` VALUES ('230', '0', '7', '文秘财务会计');
+INSERT INTO `industry_work` VALUES ('231', '0', '7', '出纳');
+INSERT INTO `industry_work` VALUES ('233', '0', '7', '结算');
+INSERT INTO `industry_work` VALUES ('234', '0', '7', '税务');
+INSERT INTO `industry_work` VALUES ('236', '0', '7', '风控法务法务');
+INSERT INTO `industry_work` VALUES ('237', '0', '7', '律师');
+INSERT INTO `industry_work` VALUES ('238', '0', '7', '专利高端职位行政总监%2F经理');
+INSERT INTO `industry_work` VALUES ('239', '0', '7', '财务总监%2F经理');
+INSERT INTO `industry_work` VALUES ('240', '0', '8', 'H5游戏开发');
+INSERT INTO `industry_work` VALUES ('242', '0', '8', '游戏后端开发');
+INSERT INTO `industry_work` VALUES ('243', '0', '8', 'C%2B%2B游戏开发');
+INSERT INTO `industry_work` VALUES ('244', '0', '8', 'FLASH');
+INSERT INTO `industry_work` VALUES ('247', '0', '8', '游戏测试产品策划游戏制作人');
+INSERT INTO `industry_work` VALUES ('248', '0', '8', '游戏产品经理');
+INSERT INTO `industry_work` VALUES ('249', '0', '8', '游戏项目经理');
+INSERT INTO `industry_work` VALUES ('251', '0', '8', '剧情设计');
+INSERT INTO `industry_work` VALUES ('252', '0', '8', '游戏文案设计游戏动画');
+INSERT INTO `industry_work` VALUES ('253', '0', '8', '游戏原画');
+INSERT INTO `industry_work` VALUES ('254', '0', '8', '游戏界面');
+INSERT INTO `industry_work` VALUES ('257', '0', '8', '游戏动作');
+INSERT INTO `industry_work` VALUES ('258', '0', '8', '游戏动效');
+INSERT INTO `industry_work` VALUES ('259', '0', '8', '游戏美工运营%2F推广游戏运营');
+INSERT INTO `industry_work` VALUES ('260', '0', '8', '游戏编辑');
+INSERT INTO `industry_work` VALUES ('261', '0', '8', '游戏推广');
+INSERT INTO `industry_work` VALUES ('262', '0', '8', '手游推广');
+INSERT INTO `industry_work` VALUES ('263', '0', '8', '页游推广其他游戏主播');
+INSERT INTO `industry_work` VALUES ('264', '0', '8', '游戏陪练');
+INSERT INTO `industry_work` VALUES ('265', '0', '8', '游戏体验');
+INSERT INTO `industry_work` VALUES ('266', '0', '8', '电竞主持');
+INSERT INTO `industry_work` VALUES ('267', '0', '8', '电竞讲师');
 
 -- ----------------------------
 -- Table structure for user_record
@@ -1201,7 +1556,7 @@ CREATE TABLE `user_resume` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(10) NOT NULL,
   `sex` varchar(10) NOT NULL,
-  `majior` varchar(15) NOT NULL,
+  `major` varchar(20) DEFAULT NULL,
   `wish_job` varchar(20) NOT NULL,
   `wish_city` varchar(20) NOT NULL,
   `wish_salary` varchar(20) NOT NULL,
