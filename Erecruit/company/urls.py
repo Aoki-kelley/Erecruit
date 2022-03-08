@@ -16,6 +16,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-urlpatterns = [
+from company.views import *
 
+urlpatterns = [
+    path('profession/<str:name>/', ProfessionDisplay.as_view(), name="展示职位"),
+    path('profession/detail/<int:id>/', ProfessionDetail.as_view(), name="展示职位"),
+    path('profession/comment/<int:id>/', ProfessionComment.as_view(), name="职位评论"),
 ]

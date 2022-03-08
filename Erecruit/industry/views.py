@@ -11,7 +11,12 @@ from industry.models import Work
 
 
 class Homepage(View):
+    # 主页
     def get(self, request):
+        '''
+        :param request: 请求
+        :return: 热门企业和热门职位数据
+        '''
         p_obs = Profession.objects
         p_obs_list = p_obs.order_by('application').reverse()
         hot_profession = []
@@ -35,8 +40,17 @@ class Homepage(View):
             n += 1
             hot_work.append({"id": w_ob.id, "industry": {'id': w_ob.industry.id, 'name': w_ob.industry.name},
                              "demand": w_ob.demand})
-            if n == 10:
+            if n == 36:
                 break
-        response = {"status_code": 2000, "code": True, "hot_profession": hot_profession, "hot_work": hot_work}
+        response = {"status_code": 2000, "msg": "成功", "hot_profession": hot_profession, "hot_work": hot_work}
         return HttpResponse(json.dumps(response, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
+
+    def http_method_not_allowed(self, request, *args, **kwargs):
+        response = {"code": 4040, "msg": "http请求方式错误(非get请求)"}
+        return HttpResponse(json.dumps(response, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+
+
+
+

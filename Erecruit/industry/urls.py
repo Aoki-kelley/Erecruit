@@ -23,5 +23,6 @@ from Erecruit import settings
 from industry import spider
 
 urlpatterns = [
-    path('', spider.main, name="主页"),
+    path('', Homepage.as_view(), name="主页"),
+    # path('', spider.main, name="主页"),
 ]
