@@ -113,8 +113,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'recruit',
-        'USER': 'root',
-        'PASSWORD': 'looking123',
+        'USER': 'recruit',
+        'PASSWORD': '123123',
     }
 }
 
