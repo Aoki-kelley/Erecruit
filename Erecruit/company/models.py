@@ -11,7 +11,7 @@ class Company(models.Model):
     name = models.CharField(max_length=20, verbose_name="企业名")
     detail = models.CharField(max_length=5000, null=True, verbose_name="企业简介")
     applicant = models.IntegerField(default=0, verbose_name="收到简历数")
-    img = models.ImageField(upload_to='company', default='RVJ4{7(3T{4`SQ5J90LX2JY.bmp', verbose_name="公司图片")
+    img = models.FileField(upload_to='company_image', default='company_image/default.bmp', verbose_name="公司图片")
 
 
 # 职位
