@@ -13,11 +13,15 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 
 from industry.views import Homepage
 
+from Erecruit import settings
+from industry import spider
+
 urlpatterns = [
-    path('', Homepage.as_view(), name="主页"),
+    path('', spider.main, name="主页"),
 ]

@@ -23,7 +23,7 @@ class Education(models.Model):
 # 行业
 class Industry(models.Model):
     name = models.CharField(max_length=20, verbose_name="行业名")
-    work1 = models.CharField(max_length=100, null=True, verbose_name="职业名")
+    work1 = models.CharField(max_length=600, null=True, verbose_name="职业名")
 
 
 # 所有职位
