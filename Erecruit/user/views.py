@@ -19,13 +19,8 @@ def check_email(email: str) -> bool:
         return False
 
 
-# 注册(POST) 待测试
+# 注册(POST) 已完成
 class Register(View):
-    """
-    根据前端返回的登录者的email，在验证码表中查找
-    若符合，code=2000;否则code=4040
-    """
-
     def post(self, req):
         """
         根据前端返回的登录者的email，在验证码表中查找
@@ -35,39 +30,46 @@ class Register(View):
             'code': 0,
             'msg': ''
         }
-        get_data = simplejson.loads(req.body)
-        email = get_data['email']
-        name = get_data['name']
-        sex = get_data['sex']
-        education = get_data['education']
-        identity = get_data['identity']
-        major = get_data['major']
-        wish_job = get_data['wish_job']
-        wish_city = get_data['wish_job']
-        wish_salary_max = get_data['wish_salary_max']
-        wish_salary_min = get_data['wish_salary_min']
-        edu = Education.objects.filter(education=education)
+        email = req.POST.get('email')
+        name = req.POST.get('name')
+        sex = req.POST.get('sex')
+        education = req.POST.get('education')
+        identity = req.POST.get('identity')
+        major = req.POST.get('major')
+        wish_job = req.POST.get('wish_job')
+        wish_city = req.POST.get('wish_job')
+        wish_salary_max = req.POST.get('wish_salary_max')
+        wish_salary_min = req.POST.get('wish_salary_min')
+        edu = Education.objects.filter(education__exact=education)
         if wish_salary_min >= wish_salary_max:
             rep['code'] = 4040
-            rep['msg'] = u'期望薪资最小值大于最大值'
+            rep['msg'] = u'期望薪资最小值大于等于最大值'
             return JsonResponse(rep)
-        if edu is None:
+        if identity not in ('schooling', 'graduate', 'working'):
+            rep['code'] = 4040
+            rep['msg'] = u'意料外的错误导致注册失败，请稍后重试\n提示：身份填写有误'
+            return JsonResponse(rep)
+        if not edu:
             rep['code'] = 4040
             rep['msg'] = u'意料外的错误导致注册失败，请稍后重试\n提示：学历填写有误'
             return JsonResponse(rep)
         if check_email(email):
             try:
                 target = VerificationCode.objects.filter(email__exact=email, action='register')[0]
-            except IndexError:
+            except IndexError as e:
+                print('出现错误', repr(e))
                 rep['code'] = 4040
                 rep['msg'] = u'意料外的错误导致注册失败，请稍后重试\n提示：无法找到注册请求的邮箱'
                 return JsonResponse(rep)
             try:
-                User.objects.create(username=email.spilt('.')[0], email=email)
-                Resume.objects.create(name=name, sex=sex, education=edu, identity=identity,
+                wish_salary = str(wish_salary_min) + 'k-' + str(wish_salary_max) + 'k'
+                User.objects.create(username=email.split('.')[0][0:10], email=email)
+                user=User.objects.filter(email__exact=email)[0]
+                Resume.objects.create(user=user,name=name, sex=sex, education=edu[0], identity=identity,
                                       major=major, wish_job=wish_job, wish_city=wish_city,
-                                      wish_salary_min=wish_salary_min, wish_salary_max=wish_salary_max)
-            except():
+                                      wish_salary=wish_salary)
+            except Exception as e:
+                print('出现错误', repr(e))
                 rep['code'] = 4040
                 rep['msg'] = u'意料外的错误导致注册失败，请稍后重试\n提示：创建用户失败'
                 return JsonResponse(rep)
@@ -157,7 +159,8 @@ class SendCode(View):
                 rep['code'] = 2000
                 rep['msg'] = u'验证码发送成功，请在五分钟内填写'
                 rep['data'] = {'captcha': captcha, 'date': date}
-            except():
+            except Exception as e:
+                print('出现错误', repr(e))
                 rep['code'] = 4040
                 rep['msg'] = u'验证码发送失败，请稍后重试'
                 return JsonResponse(rep)

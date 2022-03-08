@@ -40,7 +40,6 @@ class Resume(models.Model):
                                 choices=(
                                     ('schooling', "在校生"),
                                     ('graduate', '毕业生'),
-
                                     ('working', "职场人士"),
                                 ))
     detail = models.CharField(max_length=200, null=True, verbose_name="个人简介")
