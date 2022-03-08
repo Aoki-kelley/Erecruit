@@ -13,6 +13,7 @@ from industry.models import Education
 class User(models.Model):
     username = models.CharField(max_length=10, verbose_name="用户名")
     email = models.EmailField(verbose_name="用户邮箱")
+    image = models.FileField(verbose_name='头像', upload_to='user_image', default='user_image/default.png')
 
 
 # 收藏
