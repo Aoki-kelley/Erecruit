@@ -20,4 +20,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # path('api/',)  # 主页api，归在company app下
     path('api/user/', include(('user.urls', 'user'), namespace='user')),
+    path('', include('industry.urls')),
 ]

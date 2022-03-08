@@ -113,8 +113,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'recruit',
-        'USER': 'recruit',
-        'PASSWORD': '123123',
+        'USER': 'root',
+        'PASSWORD': 'looking123',
     }
 }
 
@@ -152,10 +152,6 @@ USE_TZ = False
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static")
-]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
@@ -185,3 +181,8 @@ BROKER_BACKEND = 'redis'
 BROKER_URL = 'redis://localhost:6379/1'
 
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/2'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media').replace('\\', '/')
+MEDIA_URL = '/media/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_URL = '/static/'
