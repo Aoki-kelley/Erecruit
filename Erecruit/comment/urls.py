@@ -15,8 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from .views import *
 
 urlpatterns = [
-    path('user/resume/launch/', ResumePost.as_view(), name="职位评论"),  # POST
+
 ]

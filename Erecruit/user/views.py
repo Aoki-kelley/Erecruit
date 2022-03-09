@@ -1,6 +1,7 @@
 import re
 import simplejson
 
+from . import serializers
 from .models import *
 from django.views.generic import View
 from django.http import JsonResponse
@@ -13,7 +14,7 @@ def check_email(email: str) -> bool:
     """
     正则匹配email，错误返回False，正确返回True
     """
-    if re.match(r'^[0-9a-zA-Z_]{0,19}@[0-9a-zA-Z]{1,13}\.[com,cn,net]{1,3}$', email):
+    if re.match(r'^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$', email):
         return True
     else:
         return False
@@ -21,6 +22,7 @@ def check_email(email: str) -> bool:
 
 # 注册(POST) 已完成
 class Register(View):
+    # noinspection PyMethodMayBeStatic
     def post(self, req):
         """
         根据前端返回的登录者的email，在验证码表中查找
@@ -64,8 +66,8 @@ class Register(View):
             try:
                 wish_salary = str(wish_salary_min) + 'k-' + str(wish_salary_max) + 'k'
                 User.objects.create(username=email.split('.')[0][0:10], email=email)
-                user=User.objects.filter(email__exact=email)[0]
-                Resume.objects.create(user=user,name=name, sex=sex, education=edu[0], identity=identity,
+                user = User.objects.filter(email__exact=email)[0]
+                Resume.objects.create(user=user, name=name, sex=sex, education=edu[0], identity=identity,
                                       major=major, wish_job=wish_job, wish_city=wish_city,
                                       wish_salary=wish_salary)
             except Exception as e:
@@ -84,10 +86,11 @@ class Register(View):
 
 # 登录(POST) 已完成
 class Login(View):
+    # noinspection PyMethodMayBeStatic
     def post(self, req):
         """
         根据前端返回的登录者的email，在验证码表中查找
-        若符合，设置session,code=2000;否则code=4040
+        若符合，设置session,code=2000,返回user;否则code=4040
         """
         rep = {
             'code': 0,
@@ -97,7 +100,10 @@ class Login(View):
         if check_email(email):
             try:
                 target = VerificationCode.objects.filter(email__exact=email, action='login')[0]
-            except IndexError:
+                user = User.objects.filter(email__exact=email)[0]
+                serializer = serializers.UserSerializer(user)
+            except Exception as e:
+                print('出现错误', repr(e))
                 rep['code'] = 4040
                 rep['msg'] = u'意料外的错误导致登录失败，请稍后重试'
                 return JsonResponse(rep)
@@ -106,25 +112,105 @@ class Login(View):
             req.session.set_expiry(86400)
             rep['code'] = 2000
             rep['msg'] = u'登录成功'
+            rep['data']['user'] = serializer.data
         else:
             rep['code'] = 4040
             rep['msg'] = u'邮箱格式不正确'
         return JsonResponse(rep)
 
 
-# 个人主页(GET)
+# 个人主页(GET)  已完成
 class HomePage(View):
-    pass
+    # noinspection PyMethodMayBeStatic
+    def get(self, req):
+        """
+        根据前端返回的用户id，查询用户，并判断当前登录的是否为本人
+        """
+        uid = req.GET.get('id')
+        rep = {
+            'code': 0,
+            'msg': ''
+        }
+        is_login = req.session.get('is_login', None)
+        try:
+            user = User.objects.filter(id=uid)[0]
+            serializer = serializers.UserSerializer(user)
+        except Exception as e:
+            print('出现错误', repr(e))
+            rep['code'] = 4040
+            rep['msg'] = u'查询的id不存在'
+            return JsonResponse(rep)
+        rep['code'] = 2000
+        rep['msg'] = u'获取成功'
+        rep['data'] = dict()
+        rep['data']['user'] = serializer.data
+        if is_login is True:
+            rep['data']['is_oneself'] = True
+        else:
+            rep['data']['is_oneself'] = False
+        return JsonResponse(rep)
 
 
 # 用户名更改(PUT)
 class ResetName(View):
-    pass
+    # noinspection PyMethodMayBeStatic
+    def put(self, req):
+        """
+        根据前端返回的用户id和新用户名，更改用户的用户名
+        """
+        rep = {
+            'code': 0,
+            'msg': ''
+        }
+        get_data = simplejson.loads(req.body)
+        uid = get_data['id']
+        new_name = get_data['new_name']
+        try:
+            user = User.objects.filter(id=uid)[0]
+        except Exception as e:
+            print('出现错误', repr(e))
+            rep['code'] = 4040
+            rep['msg'] = u'查询的id不存在'
+            return JsonResponse(rep)
+        try:
+            user.username = new_name
+            user.save()
+        except Exception as e:
+            print('出现错误', repr(e))
+            rep['code'] = 4040
+            rep['msg'] = u'修改失败，用户名可能过长'
+            return JsonResponse(rep)
+        rep['code'] = 2000
+        rep['msg'] = u'修改成功'
+        return JsonResponse(rep)
 
 
-# 个人简历(GET,PUT)
+# 个人简历(GET,PUT) GET测完
 class MineResume(View):
-    pass
+    # noinspection PyMethodMayBeStatic
+    def get(self, req):
+        uid = req.GET.get('id')
+        rep = {
+            'code': 0,
+            'msg': ''
+        }
+        try:
+            user = User.objects.filter(id=uid)[0]
+            resume = Resume.objects.filter(user_id=user.id)[0]
+            serializer = serializers.ResumeSerializer(resume)
+        except Exception as e:
+            print('出现错误', repr(e))
+            rep['code'] = 4040
+            rep['msg'] = u'查询的用户或简历不存在'
+            return JsonResponse(rep)
+        rep['code'] = 2000
+        rep['msg'] = u'查询成功'
+        rep['data'] = dict()
+        rep['data']['resume'] = serializer.data
+        return JsonResponse(rep)
+
+    def put(self, req):
+        pass
 
 
 # 个人收藏职位(GET,DEL)
@@ -139,6 +225,7 @@ class MineComment(View):
 
 # 发送邮件验证码(GET) 已完成
 class SendCode(View):
+    # noinspection PyMethodMayBeStatic
     def get(self, req):
         """
         根据前端返回的email和url参数action在验证码表中新增数据并将验证码(captcha)和发送时间(date)返回
