@@ -13,6 +13,7 @@ from user.models import Wish, Resume, Record
 from comment.models import Comment
 
 
+# 职位页
 class ProfessionDisplay(View):
     def get(self, request, name):
         '''
@@ -51,6 +52,7 @@ class ProfessionDisplay(View):
                             content_type="application/json,charset=utf-8")
 
 
+# 职位详情页
 class ProfessionDetail(View):
     def get(self, request, id):
         '''
@@ -102,6 +104,7 @@ class ProfessionDetail(View):
                             content_type="application/json,charset=utf-8")
 
 
+# 职位评论（展示）
 class ProfessionComment(View):
     def get(self, request, id):
         '''
@@ -125,7 +128,8 @@ class ProfessionComment(View):
             if comment.profession.id == id:
                 comment_list.append(
                     {"id": comment.id,
-                     "user": {"id": comment.user.id, "username": comment.user.username, "email": comment.user.email},
+                     "user": {"id": comment.user.id, "username": comment.user.username, "email": comment.user.email,
+                              "image": comment.user.email},
                      "date": str(comment.date), "detail": comment.detail,
                      "profession": {"id": comment.profession.id, "industry": {"id": comment.profession.industry.id,
                                                                               "name": comment.profession.industry.name},

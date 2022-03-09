@@ -14,19 +14,16 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-from user import views
+from django.urls import path, include
+from Erecruit import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
-    path('register/', views.Register.as_view(), name='register'),  # POST
-    path('login/', views.Login.as_view(), name='login'),  # POST
-    path('space/{id}/', views.HomePage.as_view(), name='homepage'),  # GET
-    path('reset_name/', views.ResetName.as_view(), name='reset_name'),  # PUT
-    path('resume/detail/', views.MineResume.as_view(), name='mine_resume_detail'),  # GET
-    path('resume/change/', views.MineResume.as_view(), name='mine_resume_change'),  # PUT
-    path('wish_profession/detail/', views.WishProfession.as_view(), name='wish_profession_detail'),  # GET
-    path('wish_profession/delete/', views.WishProfession.as_view(), name='wish_profession_delete'),  # DEL
-    path('comment/detail/', views.MineComment.as_view(), name='comment_detail'),  # GET
-    path('comment/delete/', views.MineComment.as_view(), name='comment_delete'),  # DEL
-    path('captcha/send/', views.SendCode.as_view(), name='send_code'),  # POST
+    path('admin/', admin.site.urls),
+    # path('api/',)  # 主页api，归在company app下  放在industry里了（doge
+    # path('api/user/', include(('user.urls', 'user'), namespace='user')), #暂时注释掉
+    path('api/user/', include('user.urls')),
+    path('api/company/', include('company.urls')),
+    path('api/', include('comment.urls')),
 ]
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
