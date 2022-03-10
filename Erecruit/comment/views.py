@@ -16,6 +16,7 @@ from industry.models import Work
 from comment.models import Comment
 
 
+# 简历投递
 class ResumePost(View):
     def post(self, request):
         '''
@@ -57,6 +58,7 @@ class ResumePost(View):
                             content_type="application/json,charset=utf-8")
 
 
+# 评论
 class CommentPost(View):
     def post(self, request):
         '''
