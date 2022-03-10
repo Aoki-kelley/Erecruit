@@ -61,29 +61,26 @@ class ProfessionDetail(View):
         :param id: 具体职位的id
         :return: profession的详细信息和是否被收藏是否提交过简历
         '''
-        if request.session.get('uid') == '':
-            response = {"code": 4040, "msg": "未登录，返回登录页"}
-            return HttpResponse(json.dumps(response, ensure_ascii=False),
-                                content_type="application/json,charset=utf-8")
+        is_wish = False
+        is_launch = False
+        if request.session.get('uid') != '':
+            user_id = request.session.get('uid')['uid']
+            for wish in Wish.objects.all():
+                if wish.user.id == user_id and wish.profession.id == id:
+                    is_wish = True
+            for resume in Record.objects.all():
+                if resume.user.id == user_id and resume.profession.id == id:
+                    is_launch = True
         if id == '':
             response = {"code": 4040, "msg": "id不能为空"}
             return HttpResponse(json.dumps(response, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
-        user_id = request.session.get('uid')['uid']
         try:
             profession = Profession.objects.get(id=id)
         except:
             response = {"code": 4040, "msg": "id不存在"}
             return HttpResponse(json.dumps(response, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
-        is_wish = False
-        is_launch = False
-        for wish in Wish.objects.all():
-            if wish.user.id == user_id and wish.profession.id == id:
-                is_wish = True
-        for resume in Record.objects.all():
-            if resume.user.id == user_id and resume.profession.id == id:
-                is_launch = True
         data = {"is_wish": is_wish, "is_launch": is_launch,
                 "profession": {"id": profession.id, "salary": profession.salary,
                                "name": profession.name,
@@ -113,6 +110,10 @@ class ProfessionComment(View):
         :param id: 职位的id
         :return: 职位相关信息和评论
         '''
+        if request.session.get('uid') == '':
+            response = {"code": 4040, "msg": "未登录，返回登录页"}
+            return HttpResponse(json.dumps(response, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
         if id == '':
             response = {"code": 4040, "msg": "id不能为空"}
             return HttpResponse(json.dumps(response, ensure_ascii=False),

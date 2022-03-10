@@ -19,4 +19,5 @@ from .views import *
 
 urlpatterns = [
     path('user/resume/launch/', ResumePost.as_view(), name="职位评论"),  # POST
+    path('user/comment/publish/', CommentPost.as_view(), name="职位评论"),
 ]

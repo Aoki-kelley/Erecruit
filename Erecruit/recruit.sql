@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50735
 File Encoding         : 65001
 
-Date: 2022-03-09 20:52:43
+Date: 2022-03-10 15:52:37
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -289,12 +289,13 @@ CREATE TABLE `comment_comment` (
   KEY `profession` (`profession_id`),
   CONSTRAINT `comment_comment_user_id_6078e57b_fk_user_user_id` FOREIGN KEY (`user_id`) REFERENCES `user_user` (`id`),
   CONSTRAINT `profession` FOREIGN KEY (`profession_id`) REFERENCES `company_profession` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Records of comment_comment
 -- ----------------------------
 INSERT INTO `comment_comment` VALUES ('1', '2022-03-08', '11', '1', '1');
+INSERT INTO `comment_comment` VALUES ('2', '2022-03-10', 'sint labore culpa in consequat', '1', '17');
 
 -- ----------------------------
 -- Table structure for company_company

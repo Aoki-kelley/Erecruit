@@ -17,12 +17,14 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 
-from industry.views import Homepage
+from industry.views import Homepage, WorkShow
 
 from Erecruit import settings
 from industry import spider
 
+
 urlpatterns = [
     path('', Homepage.as_view(), name="主页"),
+    path('industry/', WorkShow.as_view()),
     # path('', spider.main, name="主页"),
 ]

@@ -10,8 +10,8 @@ from company.models import Profession
 from industry.models import Work
 
 
+# 主页
 class Homepage(View):
-    # 主页
     def get(self, request):
         '''
         :param request: 请求
@@ -42,7 +42,7 @@ class Homepage(View):
                              "demand": w_ob.demand})
             if n == 36:
                 break
-        response = {"status_code": 2000, "msg": "成功", "hot_profession": hot_profession, "hot_work": hot_work}
+        response = {"code": 2000, "msg": "成功", "data": {"hot_profession": hot_profession, "hot_work": hot_work}}
         return HttpResponse(json.dumps(response, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
 
@@ -52,5 +52,18 @@ class Homepage(View):
                             content_type="application/json,charset=utf-8")
 
 
+class WorkShow(View):
+    def get(self, request):
+        work_list = []
+        for work in Work.objects.all():
+            work_list.append(
+                {"name": work.name, "id": work.id, "industry": {"id": work.industry.id, "name": work.industry.name},
+                 "demand": work.demand})
+        response = {"code": 2000, "msg": "成功", "data": {"work": work_list}}
+        return HttpResponse(json.dumps(response, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
 
-
+    def http_method_not_allowed(self, request, *args, **kwargs):
+        response = {"code": 4040, "msg": "http请求方式错误(非get请求)"}
+        return HttpResponse(json.dumps(response, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
