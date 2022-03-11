@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 80011
 File Encoding         : 65001
 
-Date: 2022-03-10 23:01:09
+Date: 2022-03-11 17:46:52
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -2227,8 +2227,8 @@ CREATE TABLE `user_user` (
 -- ----------------------------
 -- Records of user_user
 -- ----------------------------
-INSERT INTO `user_user` VALUES ('1', '李华', '2660675754@qq.com', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
-INSERT INTO `user_user` VALUES ('2', '小明', '2222@163.com', 'RVJ4{7(3T{4`SQ5J90LX2JY.bmp');
+INSERT INTO `user_user` VALUES ('1', '李华', '2660675754@qq.com', 'user_image/default.png');
+INSERT INTO `user_user` VALUES ('2', '小明', '2222@163.com', 'user_image/default.png');
 
 -- ----------------------------
 -- Table structure for user_verificationcode
