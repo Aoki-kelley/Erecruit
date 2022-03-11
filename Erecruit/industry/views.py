@@ -38,8 +38,9 @@ class Homepage(View):
         n = 0
         for w_ob in w_obs_list:
             n += 1
-            hot_work.append({"id": w_ob.id, "industry": {'id': w_ob.industry.id, 'name': w_ob.industry.name},
-                             "demand": w_ob.demand})
+            hot_work.append(
+                {"id": w_ob.id, 'name': w_ob.name, "industry": {'id': w_ob.industry.id, 'name': w_ob.industry.name},
+                 "demand": w_ob.demand})
             if n == 36:
                 break
         response = {"code": 2000, "msg": "成功", "data": {"hot_profession": hot_profession, "hot_work": hot_work}}

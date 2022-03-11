@@ -20,9 +20,9 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('industry.urls')),  # 主页api，归在company app下  放在industry里了（doge
     path('api/user/', include(('user.urls', 'user'), namespace='user')),
-    path('api/company/', include('company.urls')),
-    path('api/', include('comment.urls')),
+    path('api/comment/', include(('comment.urls', 'comment'), namespace='comment')),
+    path('api/company/', include(('company.urls', 'company'), namespace='company')),
+    path('api/industry/', include(('industry.urls', 'industry'), namespace='industry')),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

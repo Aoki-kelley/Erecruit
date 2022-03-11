@@ -76,15 +76,15 @@ class CommentPost(View):
             response = {"code": 4040, "msg": "输入不合法"}
             return HttpResponse(json.dumps(response, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
-        user_id = 1
-        user_id = request.session.get('uid')['uid']
+        # user_id = 1
+        user_id = request.session.get('uid')
         Comment.objects.create(detail=comment["detail"], user=User.objects.get(id=user_id),
                                profession=Profession.objects.get(id=comment["profession"]["id"]))
         response = {"code": 2000, "msg": "发言成功"}
         return HttpResponse(json.dumps(response, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
+
     def http_method_not_allowed(self, request, *args, **kwargs):
         response = {"code": 4040, "msg": "http请求方式错误(非post请求)"}
         return HttpResponse(json.dumps(response, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
-

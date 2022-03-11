@@ -113,3 +113,19 @@ class CommentSerializer(serializers.ModelSerializer):
             'detail',
             'profession',
         )
+
+
+class RecordSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    profession = ProfessionSerializer(read_only=True)
+    resume = ResumeSerializer(read_only=True)
+
+    class Meta:
+        model = Record
+        fields = (
+            'id',
+            'profession',
+            'resume',
+            'user',
+            'status',
+        )

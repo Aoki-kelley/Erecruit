@@ -169,11 +169,11 @@ EMAIL_USE_TLS = False
 
 EMAIL_USE_SSL = True
 
-EMAIL_HOST_USER = ''
+EMAIL_HOST_USER = 'aoki_admin@163.com'
 
-EMAIL_HOST_PASSWORD = ''
+EMAIL_HOST_PASSWORD = 'EWAJHICWEMISPDOE'
 
-EMAIL_FROM = '邮箱验证<>'
+EMAIL_FROM = '邮箱验证<aoki_admin@163.com>'
 
 # redis配置
 BROKER_BACKEND = 'redis'

@@ -64,7 +64,7 @@ class ProfessionDetail(View):
         is_wish = False
         is_launch = False
         if request.session.get('uid') != '':
-            user_id = request.session.get('uid')['uid']
+            user_id = request.session.get('uid')
             for wish in Wish.objects.all():
                 if wish.user.id == user_id and wish.profession.id == id:
                     is_wish = True

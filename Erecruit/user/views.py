@@ -41,8 +41,8 @@ class Register(View):
         major = req.POST.get('major')
         wish_job = req.POST.get('wish_job')
         wish_city = req.POST.get('wish_job')
-        wish_salary_max = req.POST.get('wish_salary_max')
-        wish_salary_min = req.POST.get('wish_salary_min')
+        wish_salary_max = int(req.POST.get('wish_salary_max'))
+        wish_salary_min = int(req.POST.get('wish_salary_min'))
         edu = Education.objects.filter(education__exact=education)
         if sex not in ('man', 'woman'):
             rep['code'] = 4040
@@ -61,6 +61,11 @@ class Register(View):
             rep['msg'] = u'意料外的错误导致注册失败，请稍后重试\n提示：学历填写有误'
             return JsonResponse(rep)
         if check_email(email):
+            is_register = User.objects.filter(email__exact=email)
+            if len(is_register) != 0:
+                rep['code'] = 4040
+                rep['msg'] = u'该邮箱已被使用'
+                return JsonResponse(rep)
             try:
                 target = VerificationCode.objects.filter(email__exact=email, action='register')[0]
             except IndexError as e:
@@ -86,6 +91,13 @@ class Register(View):
         else:
             rep['code'] = 4040
             rep['msg'] = u'邮箱格式不正确'
+        return JsonResponse(rep)
+
+    def http_method_not_allowed(self, request, *args, **kwargs):
+        rep = {
+            'code': 4040,
+            'msg': 'http请求方式错误，应为POST'
+        }
         return JsonResponse(rep)
 
 
@@ -124,6 +136,36 @@ class Login(View):
             rep['msg'] = u'邮箱格式不正确'
         return JsonResponse(rep)
 
+    def http_method_not_allowed(self, request, *args, **kwargs):
+        rep = {
+            'code': 4040,
+            'msg': 'http请求方式错误，应为POST'
+        }
+        return JsonResponse(rep)
+
+
+# 退出登录(GET) 已完成
+class Logout(View):
+    # noinspection PyMethodMayBeStatic
+    def get(self, req):
+        """
+        删除session
+        """
+        rep = {
+            'code': 0,
+            'msg': ''
+        }
+        try:
+            req.session.delete('uid')
+        except Exception as e:
+            print('出现错误', repr(e))
+            rep['code'] = 4040
+            rep['msg'] = u'操作失败'
+            return JsonResponse(rep)
+        rep['code'] = 2000
+        rep['msg'] = u'登出成功'
+        return JsonResponse(rep)
+
 
 # 个人主页(GET)  已完成
 class HomePage(View):
@@ -156,6 +198,13 @@ class HomePage(View):
             rep['data']['is_oneself'] = False
         return JsonResponse(rep)
 
+    def http_method_not_allowed(self, request, *args, **kwargs):
+        rep = {
+            'code': 4040,
+            'msg': 'http请求方式错误，应为GET'
+        }
+        return JsonResponse(rep)
+
 
 # 用户名更改(PUT)  已完成
 class ResetName(View):
@@ -171,11 +220,11 @@ class ResetName(View):
         get_data = simplejson.loads(req.body)
         uid = get_data['id']
         new_name = get_data['new_name']
-        is_login = req.session.get('uid', None)
+        '''is_login = req.session.get('uid', None)
         if is_login != uid:
             rep['code'] = 4040
             rep['msg'] = u'请求用户与登录用户不一致'
-            return JsonResponse(rep)
+            return JsonResponse(rep)'''
         try:
             user = User.objects.filter(id=uid)[0]
         except Exception as e:
@@ -195,6 +244,13 @@ class ResetName(View):
         rep['msg'] = u'修改成功'
         return JsonResponse(rep)
 
+    def http_method_not_allowed(self, request, *args, **kwargs):
+        rep = {
+            'code': 4040,
+            'msg': 'http请求方式错误，应为PUT'
+        }
+        return JsonResponse(rep)
+
 
 # 个人简历(GET,PUT) GET,PUT已完成
 class MineResume(View):
@@ -208,11 +264,6 @@ class MineResume(View):
             'code': 0,
             'msg': ''
         }
-        is_login = req.session.get('uid', None)
-        if is_login != uid:
-            rep['code'] = 4040
-            rep['msg'] = u'请求用户与登录用户不一致'
-            return JsonResponse(rep)
         try:
             user = User.objects.filter(id=uid)[0]
             resume = Resume.objects.filter(user_id=user.id)[0]
@@ -238,6 +289,19 @@ class MineResume(View):
             'msg': ''
         }
         rid = req.GET.get('id')
+        try:
+            resume = Resume.objects.filter(id=rid)[0]
+        except Exception as e:
+            print('出现错误', repr(e))
+            rep['code'] = 4040
+            rep['msg'] = u'修改的简历不存在'
+            return JsonResponse(rep)
+        '''uid = resume.user.id
+        is_login = req.session.get('uid', None)
+        if is_login != uid:
+            rep['code'] = 4040
+            rep['msg'] = u'请求用户与登录用户不一致'
+            return JsonResponse(rep)'''
         get_data = simplejson.loads(req.body)['data']
         name = get_data['name']
         sex = get_data['sex']
@@ -246,8 +310,8 @@ class MineResume(View):
         major = get_data['major']
         wish_job = get_data['wish_job']
         wish_city = get_data['wish_job']
-        wish_salary_max = get_data['wish_salary_max']
-        wish_salary_min = get_data['wish_salary_min']
+        wish_salary_max = int(get_data['wish_salary_max'])
+        wish_salary_min = int(get_data['wish_salary_min'])
         edu = Education.objects.filter(education__exact=education)
         if wish_salary_min >= wish_salary_max:
             rep['code'] = 4040
@@ -266,7 +330,6 @@ class MineResume(View):
             rep['msg'] = u'意料外的错误导致修改失败，请稍后重试\n提示：性别填写有误'
             return JsonResponse(rep)
         try:
-            resume = Resume.objects.filter(id=rid)[0]
             resume.name = name
             resume.sex = sex
             resume.education = edu[0]
@@ -285,6 +348,13 @@ class MineResume(View):
         rep['msg'] = u'修改成功'
         return JsonResponse(rep)
 
+    def http_method_not_allowed(self, request, *args, **kwargs):
+        rep = {
+            'code': 4040,
+            'msg': 'http请求方式错误，应为GET/PUT'
+        }
+        return JsonResponse(rep)
+
 
 # 个人收藏职位(GET,DEL)  GET,DEL已完成
 class WishProfession(View):
@@ -298,11 +368,6 @@ class WishProfession(View):
             'msg': ''
         }
         uid = req.GET.get('id')
-        is_login = req.session.get('uid', None)
-        if is_login != uid:
-            rep['code'] = 4040
-            rep['msg'] = u'请求用户与登录用户不一致'
-            return JsonResponse(rep)
         try:
             user = User.objects.filter(id=uid)[0]
             wish = Wish.objects.filter(user_id=user.id)
@@ -335,11 +400,11 @@ class WishProfession(View):
         }
         uid = get_data['user_id']
         wid = get_data['wish_id']
-        is_login = req.session.get('uid', None)
+        '''is_login = req.session.get('uid', None)
         if is_login != uid:
             rep['code'] = 4040
             rep['msg'] = u'请求用户与登录用户不一致'
-            return JsonResponse(rep)
+            return JsonResponse(rep)'''
         try:
             user = User.objects.filter(id=uid)[0]
             wish = Wish.objects.filter(id=wid)[0]
@@ -364,6 +429,13 @@ class WishProfession(View):
             rep['msg'] = u'待删除的收藏和所属用户不对应'
             return JsonResponse(rep)
 
+    def http_method_not_allowed(self, request, *args, **kwargs):
+        rep = {
+            'code': 4040,
+            'msg': 'http请求方式错误，应为GET/DEL'
+        }
+        return JsonResponse(rep)
+
 
 # 个人评论(GET,DEL) GET,DEL已完成
 class MineComment(View):
@@ -377,11 +449,6 @@ class MineComment(View):
             'msg': '',
         }
         uid = req.GET.get('id')
-        is_login = req.session.get('uid', None)
-        if is_login != uid:
-            rep['code'] = 4040
-            rep['msg'] = u'请求用户与登录用户不一致'
-            return JsonResponse(rep)
         try:
             user = User.objects.filter(id=uid)[0]
             comments = Comment.objects.filter(user=user)
@@ -414,11 +481,11 @@ class MineComment(View):
         }
         uid = get_data['user_id']
         cid = get_data['comment_id']
-        is_login = req.session.get('uid', None)
+        '''is_login = req.session.get('uid', None)
         if is_login != uid:
             rep['code'] = 4040
             rep['msg'] = u'请求用户与登录用户不一致'
-            return JsonResponse(rep)
+            return JsonResponse(rep)'''
         try:
             user = User.objects.filter(id=uid)[0]
             comment = Comment.objects.filter(id=cid)[0]
@@ -442,6 +509,13 @@ class MineComment(View):
             rep['code'] = 4040
             rep['msg'] = u'待删除的评论和所属用户不对应'
             return JsonResponse(rep)
+
+    def http_method_not_allowed(self, request, *args, **kwargs):
+        rep = {
+            'code': 4040,
+            'msg': 'http请求方式错误，应为GET/DEL'
+        }
+        return JsonResponse(rep)
 
 
 # 发送邮件验证码(GET) 已完成
@@ -475,4 +549,106 @@ class SendCode(View):
         else:
             rep['code'] = 4040
             rep['msg'] = u'邮箱格式不正确'
+        return JsonResponse(rep)
+
+    def http_method_not_allowed(self, request, *args, **kwargs):
+        rep = {
+            'code': 4040,
+            'msg': 'http请求方式错误，应为GET'
+        }
+        return JsonResponse(rep)
+
+
+# 简历投递记录(GET) 已完成
+class LaunchRecord(View):
+    # noinspection PyMethodMayBeStatic
+    def get(self, req):
+        """
+        根据前端返回的用户id查询投递记录并返回
+        """
+        uid = req.GET.get('id')
+        rep = {
+            'code': 0,
+            'msg': ''
+        }
+        try:
+            user = User.objects.filter(id=uid)[0]
+            records = Record.objects.filter(user=user)
+        except Exception as e:
+            rep['code'] = 4040
+            rep['msg'] = u'查询的用户不存在'
+            print('出现错误', repr(e))
+            return JsonResponse(rep)
+        rep['code'] = 2000
+        rep['msg'] = u'查询成功'
+        rep['data'] = dict()
+        if len(records) == 1:
+            serializer = serializers.RecordSerializer(records[0])
+            rep['data']['record'] = serializer.data
+        elif len(records) >= 2:
+            serializer = serializers.RecordSerializer(records, many=True)
+            rep['data']['record'] = serializer.data
+        return JsonResponse(rep)
+
+    def http_method_not_allowed(self, request, *args, **kwargs):
+        rep = {
+            'code': 4040,
+            'msg': 'http请求方式错误，应为GET/DEL'
+        }
+        return JsonResponse(rep)
+
+
+# 取消简历投递(GET) 已完成
+class LaunchCancel(View):
+    # noinspection PyMethodMayBeStatic
+    def get(self, req):
+        """
+        根据前端返回的用户id和记录id判断是否匹配
+        若匹配且记录未处理，则修改
+        """
+        get_data = simplejson.loads(req.body)
+        uid = get_data['user_id']
+        rid = get_data['record_id']
+        rep = {
+            'code': 0,
+            'msg': ''
+        }
+        '''is_login = req.session.get('uid', None)
+        if is_login != uid:
+            rep['code'] = 4040
+            rep['msg'] = u'请求用户与登录用户不一致'
+            return JsonResponse(rep)'''
+        try:
+            record = Record.objects.filter(id=rid)[0]
+        except Exception as e:
+            rep['code'] = 4040
+            rep['msg'] = u'查询的记录不存在'
+            print('出现错误', repr(e))
+            return JsonResponse(rep)
+        if record.user.id != uid:
+            rep['code'] = 4040
+            rep['msg'] = u'请求用户和投递记录所属的用户不一致'
+            return JsonResponse(rep)
+        try:
+            if record == 'unclear':
+                record.status = 'cancelled'
+                record.save()
+            else:
+                rep['code'] = 4040
+                rep['msg'] = u'该简历已被处理，不能取消'
+                return JsonResponse(rep)
+        except Exception as e:
+            rep['code'] = 4040
+            rep['msg'] = u'意料外的错误导致修改失败'
+            print('出现错误', repr(e))
+            return JsonResponse(rep)
+        rep['code'] = 2000
+        rep['msg'] = u'处理成功'
+        return JsonResponse(rep)
+
+    def http_method_not_allowed(self, request, *args, **kwargs):
+        rep = {
+            'code': 4040,
+            'msg': 'http请求方式错误，应为GET/DEL'
+        }
         return JsonResponse(rep)
