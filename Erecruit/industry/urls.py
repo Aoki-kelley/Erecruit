@@ -24,5 +24,5 @@ from Erecruit import settings
 
 urlpatterns = [
     path('homepage/', Homepage.as_view(), name="主页"),
-    path('all/', WorkShow.as_view()),
+    # path('all/', WorkShow.as_view()),
 ]
