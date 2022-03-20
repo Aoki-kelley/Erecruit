@@ -1,6 +1,9 @@
 import re
 import simplejson
+import pytz
 
+from datetime import timedelta
+from Erecruit.token_model import *
 from . import serializers
 from .models import *
 from comment.models import *
@@ -124,16 +127,16 @@ class Login(View):
                 target = VerificationCode.objects.filter(email__exact=email, action='login')[0]
                 user = User.objects.filter(email__exact=email)[0]
                 serializer = serializers.UserSerializer(user)
+                token = create_token(email)
             except Exception as e:
                 print('出现错误', repr(e))
                 rep['code'] = 4040
                 rep['msg'] = u'意料外的错误导致登录失败，请稍后重试'
                 return JsonResponse(rep)
             target.delete()
-            req.session['uid'] = user.id
-            req.session.set_expiry(86400)
             rep['code'] = 2000
             rep['msg'] = u'登录成功'
+            rep['token'] = token
             rep['data'] = dict()
             rep['data']['user'] = serializer.data
         else:
@@ -154,14 +157,17 @@ class Logout(View):
     # noinspection PyMethodMayBeStatic
     def get(self, req):
         """
-        删除session
+        删除缓存里的token
         """
         rep = {
             'code': 0,
             'msg': ''
         }
         try:
-            req.session.delete('uid')
+            get_data = simplejson.loads(req.body)
+            token = get_data['token']
+            email = get_email(token)
+            cache.delete(email)
         except Exception as e:
             print('出现错误', repr(e))
             rep['code'] = 4040
@@ -184,9 +190,11 @@ class HomePage(View):
             'msg': ''
         }
         uid = req.GET.get('id')
-        is_login = req.session.get('uid', None)
+        get_data = simplejson.loads(req.body)
+        token = get_data['token']
+        email = get_email(token)
         try:
-            user = User.objects.filter(id=uid)[0]
+            user = User.objects.filter(email__exact=email)[0]
             serializer = serializers.UserSerializer(user)
         except Exception as e:
             print('出现错误', repr(e))
@@ -197,7 +205,7 @@ class HomePage(View):
         rep['msg'] = u'获取成功'
         rep['data'] = dict()
         rep['data']['user'] = serializer.data
-        if is_login == uid:
+        if user.id == uid:
             rep['data']['is_oneself'] = True
         else:
             rep['data']['is_oneself'] = False
@@ -223,19 +231,15 @@ class ResetName(View):
             'msg': ''
         }
         get_data = simplejson.loads(req.body)
-        uid = get_data['id']
+        token = get_data['token']
         new_name = get_data['new_name']
-        '''is_login = req.session.get('uid', None)
-        if is_login != uid:
-            rep['code'] = 4040
-            rep['msg'] = u'请求用户与登录用户不一致'
-            return JsonResponse(rep)'''
         try:
-            user = User.objects.filter(id=uid)[0]
+            email = get_email(token)
+            user = User.objects.filter(email__exact=email)[0]
         except Exception as e:
             print('出现错误', repr(e))
             rep['code'] = 4040
-            rep['msg'] = u'查询的id不存在'
+            rep['msg'] = u'查询的用户不存在'
             return JsonResponse(rep)
         try:
             user.username = new_name
@@ -294,19 +298,20 @@ class MineResume(View):
             'msg': ''
         }
         rid = req.GET.get('id')
+        token = simplejson.loads(req.body)['token']
         try:
+            email = get_email(token)
+            user = User.objects.filter(email__exact=email)[0]
             resume = Resume.objects.filter(id=rid)[0]
+            if resume.user.id != user.id:
+                rep['code'] = 4040
+                rep['msg'] = u'待修改简历的所有者和请求用户不一致'
+                return JsonResponse(rep)
         except Exception as e:
             print('出现错误', repr(e))
             rep['code'] = 4040
             rep['msg'] = u'修改的简历不存在'
             return JsonResponse(rep)
-        '''uid = resume.user.id
-        is_login = req.session.get('uid', None)
-        if is_login != uid:
-            rep['code'] = 4040
-            rep['msg'] = u'请求用户与登录用户不一致'
-            return JsonResponse(rep)'''
         get_data = simplejson.loads(req.body)['data']
         name = get_data['name']
         sex = get_data['sex']
@@ -318,21 +323,30 @@ class MineResume(View):
         wish_salary_max = int(get_data['wish_salary_max'])
         wish_salary_min = int(get_data['wish_salary_min'])
         edu = Education.objects.filter(education__exact=education)
+        wrong_flag = 0
+        wrong_message = []
         if wish_salary_min >= wish_salary_max:
-            rep['code'] = 4040
-            rep['msg'] = u'意料外的错误导致修改失败，请稍后重试\n提示：期望薪资最小值大于等于最大值'
-            return JsonResponse(rep)
-        if not edu:
-            rep['code'] = 4040
-            rep['msg'] = u'意料外的错误导致修改失败，请稍后重试\n提示：学历填写有误'
-            return JsonResponse(rep)
-        if identity not in ('schooling', 'graduate', 'working'):
-            rep['code'] = 4040
-            rep['msg'] = u'意料外的错误导致修改失败，请稍后重试\n提示：身份填写有误'
-            return JsonResponse(rep)
+            wrong_message.append('期望薪资填写有误')
+            wrong_flag += 1
         if sex not in ('man', 'woman'):
-            rep['code'] = 4040
-            rep['msg'] = u'意料外的错误导致修改失败，请稍后重试\n提示：性别填写有误'
+            wrong_message.append('性别填写有误')
+            wrong_flag += 1
+        if identity not in ('schooling', 'graduate', 'working'):
+            wrong_message.append('身份信息填写有误')
+            wrong_flag += 1
+        if not edu:
+            wrong_message.append('学历填写有误')
+            wrong_flag += 1
+        rep['code'] = 4040
+        if wrong_flag != 0:
+            for i in range(wrong_flag):
+                if i == wrong_flag - 1:
+                    wrong_message[i] += '。'
+                else:
+                    wrong_message[i] += '，'
+            rep['msg'] = u'填写的信息有误，请修改后重试\n提示：'
+            for i in range(wrong_flag):
+                rep['msg'] += wrong_message[i]
             return JsonResponse(rep)
         try:
             resume.name = name
@@ -403,36 +417,31 @@ class WishProfession(View):
             'code': 0,
             'msg': '',
         }
-        uid = get_data['user_id']
+        token = get_data['token']
         wid = get_data['wish_id']
-        '''is_login = req.session.get('uid', None)
-        if is_login != uid:
-            rep['code'] = 4040
-            rep['msg'] = u'请求用户与登录用户不一致'
-            return JsonResponse(rep)'''
         try:
-            user = User.objects.filter(id=uid)[0]
+            email = get_email(token)
+            user = User.objects.filter(email__exact=email)[0]
             wish = Wish.objects.filter(id=wid)[0]
+            if wish.user.id != user.id:
+                rep['code'] = 4040
+                rep['msg'] = u'待删除的收藏记录的所有者和请求用户不一致'
+                return JsonResponse(rep)
         except Exception as e:
             print('出现错误', repr(e))
             rep['code'] = 4040
             rep['msg'] = u'查询的用户或收藏的职位不存在'
             return JsonResponse(rep)
-        if wish.user == user:
-            try:
-                wish.delete()
-            except Exception as e:
-                print('出现错误', repr(e))
-                rep['code'] = 4040
-                rep['msg'] = u'意料外的错误导致操作失败'
-                return JsonResponse(rep)
-            rep['code'] = 2000
-            rep['msg'] = u'删除成功'
-            return JsonResponse(rep)
-        else:
+        try:
+            wish.delete()
+        except Exception as e:
+            print('出现错误', repr(e))
             rep['code'] = 4040
-            rep['msg'] = u'待删除的收藏和所属用户不对应'
+            rep['msg'] = u'意料外的错误导致操作失败'
             return JsonResponse(rep)
+        rep['code'] = 2000
+        rep['msg'] = u'删除成功'
+        return JsonResponse(rep)
 
     def http_method_not_allowed(self, request, *args, **kwargs):
         rep = {
@@ -484,36 +493,31 @@ class MineComment(View):
             'code': 0,
             'msg': '',
         }
-        uid = get_data['user_id']
+        token = get_data['token']
         cid = get_data['comment_id']
-        '''is_login = req.session.get('uid', None)
-        if is_login != uid:
-            rep['code'] = 4040
-            rep['msg'] = u'请求用户与登录用户不一致'
-            return JsonResponse(rep)'''
         try:
-            user = User.objects.filter(id=uid)[0]
+            email = get_email(token)
+            user = User.objects.filter(email__exact=email)[0]
             comment = Comment.objects.filter(id=cid)[0]
+            if comment.user.id != user.id:
+                rep['code'] = 4040
+                rep['msg'] = u'待删除的评论的所有者和请求用户不一致'
+                return JsonResponse(rep)
         except Exception as e:
             print('出现错误', repr(e))
             rep['code'] = 4040
             rep['msg'] = u'查询的用户或评论不存在'
             return JsonResponse(rep)
-        if comment.user == user:
-            try:
-                comment.delete()
-            except Exception as e:
-                print('出现错误', repr(e))
-                rep['code'] = 4040
-                rep['msg'] = u'意料外的错误导致操作失败'
-                return JsonResponse(rep)
-            rep['msg'] = u'删除成功'
-            rep['code'] = 2000
-            return JsonResponse(rep)
-        else:
+        try:
+            comment.delete()
+        except Exception as e:
+            print('出现错误', repr(e))
             rep['code'] = 4040
-            rep['msg'] = u'待删除的评论和所属用户不对应'
+            rep['msg'] = u'意料外的错误导致操作失败'
             return JsonResponse(rep)
+        rep['msg'] = u'删除成功'
+        rep['code'] = 2000
+        return JsonResponse(rep)
 
     def http_method_not_allowed(self, request, *args, **kwargs):
         rep = {
@@ -548,10 +552,9 @@ class SendCode(View):
                     return JsonResponse(rep)
             try:
                 send_task = SendEmailTask()
-                captcha, date = send_task.run(email, label=action)
+                send_task.run(email, label=action)
                 rep['code'] = 2000
                 rep['msg'] = u'验证码发送成功，请在五分钟内填写'
-                rep['data'] = {'captcha': captcha, 'date': date}
             except Exception as e:
                 print('出现错误', repr(e))
                 rep['code'] = 4040
@@ -566,6 +569,50 @@ class SendCode(View):
         rep = {
             'code': 4040,
             'msg': 'http请求方式错误，应为GET'
+        }
+        return JsonResponse(rep)
+
+
+class CheckCode(View):
+    # noinspection PyMethodMayBeStatic
+    def post(self, req):
+        rep = {
+            'code': 0,
+            'msg': ''
+        }
+        action = req.GET.get('action')
+        get_data = simplejson.loads(req.body)
+        email = get_data['email']
+        code = get_data['code']
+        try:
+            target = VerificationCode.objects.filter(email__exact=email, action=action)[0]
+            correct_code = target.code
+        except Exception as e:
+            rep['code'] = 4040
+            rep['msg'] = u'查询的邮箱验证码不存在'
+            print('出现错误', repr(e))
+            return JsonResponse(rep)
+        print(target.date)
+        time_now = datetime.now()
+        time_now = time_now.replace(tzinfo=pytz.timezone('Asia/Shanghai')).date()
+        gap = (time_now - (target.date + timedelta(hours=0))).total_seconds() / 60
+        print(gap)
+        if gap > 5:
+            rep['code'] = 4040
+            rep['msg'] = u'验证码超时，请重新获取'
+        else:
+            if code == correct_code:
+                rep['code'] = 2000
+                rep['msg'] = u'验证成功'
+            else:
+                rep['code'] = 4040
+                rep['msg'] = u'验证码错误'
+        return JsonResponse(rep)
+
+    def http_method_not_allowed(self, request, *args, **kwargs):
+        rep = {
+            'code': 4040,
+            'msg': 'http请求方式错误，应为POST'
         }
         return JsonResponse(rep)
 
@@ -618,27 +665,24 @@ class LaunchCancel(View):
         若匹配且记录未处理，则修改
         """
         get_data = simplejson.loads(req.body)
-        uid = get_data['user_id']
+        token = get_data['token']
         rid = get_data['record_id']
         rep = {
             'code': 0,
             'msg': ''
         }
-        '''is_login = req.session.get('uid', None)
-        if is_login != uid:
-            rep['code'] = 4040
-            rep['msg'] = u'请求用户与登录用户不一致'
-            return JsonResponse(rep)'''
         try:
+            email = get_email(token)
+            user = User.objects.filter(email__exact=email)
             record = Record.objects.filter(id=rid)[0]
+            if record.user.id != user.id:
+                rep['code'] = 4040
+                rep['msg'] = u'待处理的投递记录的所有者和请求用户不一致'
+                return JsonResponse(rep)
         except Exception as e:
             rep['code'] = 4040
             rep['msg'] = u'查询的记录不存在'
             print('出现错误', repr(e))
-            return JsonResponse(rep)
-        if record.user.id != uid:
-            rep['code'] = 4040
-            rep['msg'] = u'请求用户和投递记录所属的用户不一致'
             return JsonResponse(rep)
         try:
             if record == 'unclear':

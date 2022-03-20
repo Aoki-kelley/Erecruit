@@ -104,6 +104,17 @@ TEMPLATES = [
     },
 ]
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'cache_table',
+        'TIMEOUT': 600,
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000
+        }
+    }
+}
+
 WSGI_APPLICATION = 'Erecruit.wsgi.application'
 
 # Database
@@ -175,6 +186,7 @@ EMAIL_HOST_PASSWORD = 'EWAJHICWEMISPDOE'
 
 EMAIL_FROM = '邮箱验证<aoki_admin@163.com>'
 
+CACHE_MIDDLEWARE_SECONDS = 500
 # redis配置
 BROKER_BACKEND = 'redis'
 

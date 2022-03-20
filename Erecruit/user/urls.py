@@ -32,4 +32,5 @@ urlpatterns = [
     path('comment/detail/', views.MineComment.as_view(), name='comment_detail'),  # GET
     path('comment/delete/', views.MineComment.as_view(), name='comment_delete'),  # DEL
     path('captcha/send/', views.SendCode.as_view(), name='send_code'),  # POST
+    path('captcha/check/', views.CheckCode.as_view(), name='check_code'),  # POST
 ]

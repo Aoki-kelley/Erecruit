@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from django.db import models
 
 # Create your models here.
@@ -49,7 +47,7 @@ class Resume(models.Model):
 class VerificationCode(models.Model):
     email = models.EmailField(verbose_name="用户邮箱")
     code = models.CharField(max_length=6, verbose_name="验证码")
-    date = models.DateField(default=datetime.now, verbose_name="申请时间")
+    date = models.DateTimeField(verbose_name="申请时间")
     action = models.CharField(max_length=10, verbose_name="用途",
                               choices=(
                                   ('register', "注册"),

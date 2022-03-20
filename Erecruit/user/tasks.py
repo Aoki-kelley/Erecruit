@@ -15,9 +15,8 @@ class SendEmailTask(Task):
         target = VerificationCode.objects.filter(email__exact=email)
         if target:
             target.delete()
-        date = datetime.datetime.now()
         VerificationCode.objects.create(email=email, code=code,
-                                        date=date, action=label)
+                                        date=datetime.datetime.now(), action=label)
         subject = '邮箱验证'
         message = '尊敬的用户，{action}，你的验证码为{code}，请在五分钟内进行验证。\n请不要回复该邮件。'
         if label == 'register':
@@ -27,4 +26,3 @@ class SendEmailTask(Task):
         sender = settings.EMAIL_FROM
         receiver = [email]
         send_mail(subject, message, sender, receiver)
-        return code, date
