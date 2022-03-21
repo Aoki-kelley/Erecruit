@@ -113,9 +113,8 @@ class ProfessionDetail(View):
         '''
         is_wish = False
         is_launch = False
-        content = json.loads(request.body.decode())
-        try:
-            token = content['token']
+        token = request.GET.get('token', None)
+        if token is not None:
             email = get_email(token)
             user_id = User.objects.get(email=email).id
             for wish in Wish.objects.all():
@@ -124,10 +123,6 @@ class ProfessionDetail(View):
             for resume in Record.objects.all():
                 if resume.user.id == user_id and resume.profession.id == id:
                     is_launch = True
-        except:
-            response = {"code": 4040, "msg": "未登录，返回登录页"}
-            return HttpResponse(json.dumps(response, ensure_ascii=False),
-                                content_type="application/json,charset=utf-8")
         if id == '':
             response = {"code": 4040, "msg": "id不能为空"}
             return HttpResponse(json.dumps(response, ensure_ascii=False),
@@ -167,7 +162,6 @@ class ProfessionComment(View):
         :param id: 职位的id
         :return: 职位相关信息和评论
         '''
-        content = json.loads(request.body.decode())
         if id == '':
             response = {"code": 4040, "msg": "id不能为空"}
             return HttpResponse(json.dumps(response, ensure_ascii=False),
