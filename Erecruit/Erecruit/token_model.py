@@ -6,7 +6,7 @@ from django.core.cache import cache
 HEADER = {'typ': 'JWP', 'alg': 'default'}
 KEY = 'token_key'
 SALT = 'django_secret_salt'
-TIME_OUT = 30 * 60  # 30min
+TIME_OUT = 24 * 60 * 60  # 1day
 
 
 def encrypt(data: dict):
