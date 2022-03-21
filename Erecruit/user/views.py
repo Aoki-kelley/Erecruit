@@ -194,7 +194,7 @@ class HomePage(View):
         token = get_data['token']
         email = get_email(token)
         try:
-            user = User.objects.filter(id=id)[0]
+            user = User.objects.filter(id=uid)[0]
             looker=User.objects.filter(email__exact=email)[0]
             serializer = serializers.UserSerializer(user)
         except Exception as e:
