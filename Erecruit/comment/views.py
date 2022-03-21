@@ -14,9 +14,12 @@ from company.models import Profession
 from industry.models import Work
 
 from comment.models import Comment
+from Erecruit.token_model import get_email
 
 
 # 简历投递
+
+
 class ResumePost(View):
     def post(self, request):
         '''
@@ -27,6 +30,14 @@ class ResumePost(View):
         content = json.loads(request.body.decode())
         resume_id = content["resume"]
         profession_id = content['profession']
+        try:
+            token = content['token']
+            email = get_email(token)
+            user_id = User.objects.get(email=email).id
+        except:
+            response = {"code": 4040, "msg": "未登录，返回登录页"}
+            return HttpResponse(json.dumps(response, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
         try:
             resume = Resume.objects.get(id=resume_id)
         except:
@@ -67,9 +78,18 @@ class CommentPost(View):
         :return:
         '''
         content = json.loads(request.body.decode())
-        comment = content["comment"]
-        if request.session.get('uid') == '':
+        try:
+            token = content['token']
+            email = get_email(token)
+            user_id = User.objects.get(email=email).id
+        except:
             response = {"code": 4040, "msg": "未登录，返回登录页"}
+            return HttpResponse(json.dumps(response, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
+        try:
+            comment = content["comment"]
+        except:
+            response = {"code": 4040, "msg": "未输入"}
             return HttpResponse(json.dumps(response, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
         if comment["detail"][0] == ' ' or comment["detail"][0] == '\n':
@@ -77,7 +97,6 @@ class CommentPost(View):
             return HttpResponse(json.dumps(response, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
         # user_id = 1
-        user_id = request.session.get('uid')
         Comment.objects.create(detail=comment["detail"], user=User.objects.get(id=user_id),
                                profession=Profession.objects.get(id=comment["profession"]["id"]))
         response = {"code": 2000, "msg": "发言成功"}

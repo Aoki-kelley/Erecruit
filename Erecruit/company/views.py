@@ -1,19 +1,24 @@
 import json
 
+from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render
 
 # Create your views here.
 from django.views import View
 
-from company.models import Profession
+from company.models import Profession, Company
 
 from user.models import Wish, Resume, Record
 
 from comment.models import Comment
 
-
 # 职位页
+from user.models import User
+
+from Erecruit.token_model import get_email
+
+
 class ProfessionDisplay(View):
     def get(self, request, name):
         '''
@@ -46,6 +51,51 @@ class ProfessionDisplay(View):
         return HttpResponse(json.dumps(response, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
 
+    def post(self, request, name):
+        if name == '':
+            response = {"code": 4040, "msg": "name不能为空"}
+            return HttpResponse(json.dumps(response, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
+        professions = Profession.objects.filter(Q(name__contains=name) | Q(name=name))
+        for company in Company.objects.all():
+            if name in company.name:
+                profession_list = Profession.objects.filter(company=company)
+        x = 0
+        try:
+            profession_list[0]
+        except:
+            x = x + 1
+        try:
+            professions[0]
+        except:
+            x = x + 1
+        if x == 2:
+            response = {"code": 4040, "msg": "无相关信息"}
+            return HttpResponse(json.dumps(response, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
+        result = []
+        for profession in profession_list:
+            company = profession.company
+            industry = profession.industry
+            education = profession.education
+            result.append({"id": profession.id, "industry": {"id": industry.id, "name": industry.name},
+                           "company": {"id": company.id, "name": company.name, "applicant": company.applicant,
+                                       "detail": company.detail}, "salary": profession.salary,
+                           "name": profession.name,
+                           "education": {"education": education.education, "id": education.id}})
+        for profession in professions:
+            company = profession.company
+            industry = profession.industry
+            education = profession.education
+            result.append({"id": profession.id, "industry": {"id": industry.id, "name": industry.name},
+                           "company": {"id": company.id, "name": company.name, "applicant": company.applicant,
+                                       "detail": company.detail}, "salary": profession.salary,
+                           "name": profession.name,
+                           "education": {"education": education.education, "id": education.id}})
+        response = {"code": 200, "data": {"result": result}, "msg": "返回成功"}
+        return HttpResponse(json.dumps(response, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+
     def http_method_not_allowed(self, request, *args, **kwargs):
         response = {"code": 4040, "msg": "http请求方式错误(非get请求)"}
         return HttpResponse(json.dumps(response, ensure_ascii=False),
@@ -63,14 +113,21 @@ class ProfessionDetail(View):
         '''
         is_wish = False
         is_launch = False
-        if request.session.get('uid') != '':
-            user_id = request.session.get('uid')
+        content = json.loads(request.body.decode())
+        try:
+            token = content['token']
+            email = get_email(token)
+            user_id = User.objects.get(email=email).id
             for wish in Wish.objects.all():
                 if wish.user.id == user_id and wish.profession.id == id:
                     is_wish = True
             for resume in Record.objects.all():
                 if resume.user.id == user_id and resume.profession.id == id:
                     is_launch = True
+        except:
+            response = {"code": 4040, "msg": "未登录，返回登录页"}
+            return HttpResponse(json.dumps(response, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
         if id == '':
             response = {"code": 4040, "msg": "id不能为空"}
             return HttpResponse(json.dumps(response, ensure_ascii=False),
@@ -110,10 +167,7 @@ class ProfessionComment(View):
         :param id: 职位的id
         :return: 职位相关信息和评论
         '''
-        if request.session.get('uid') == '':
-            response = {"code": 4040, "msg": "未登录，返回登录页"}
-            return HttpResponse(json.dumps(response, ensure_ascii=False),
-                                content_type="application/json,charset=utf-8")
+        content = json.loads(request.body.decode())
         if id == '':
             response = {"code": 4040, "msg": "id不能为空"}
             return HttpResponse(json.dumps(response, ensure_ascii=False),
