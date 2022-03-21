@@ -194,18 +194,19 @@ class HomePage(View):
         token = get_data['token']
         email = get_email(token)
         try:
-            user = User.objects.filter(email__exact=email)[0]
+            user = User.objects.filter(id=uid)[0]
+            looker=User.objects.filter(email__exact=email)[0]
             serializer = serializers.UserSerializer(user)
         except Exception as e:
             print('出现错误', repr(e))
             rep['code'] = 4040
-            rep['msg'] = u'查询的id不存在'
+            rep['msg'] = u'查询的用户不存在'
             return JsonResponse(rep)
         rep['code'] = 2000
         rep['msg'] = u'获取成功'
         rep['data'] = dict()
         rep['data']['user'] = serializer.data
-        if user.id == uid:
+        if user.id == looker.id:
             rep['data']['is_oneself'] = True
         else:
             rep['data']['is_oneself'] = False
@@ -595,6 +596,7 @@ class CheckCode(View):
         print(target.date)
         time_now = datetime.now()
         time_now = time_now.replace(tzinfo=pytz.timezone('Asia/Shanghai')).date()
+        print(time_now)
         gap = (time_now - (target.date + timedelta(hours=0))).total_seconds() / 60
         print(gap)
         if gap > 5:
