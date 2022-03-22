@@ -113,8 +113,8 @@ class ProfessionDetail(View):
         '''
         is_wish = False
         is_launch = False
-        token = request.GET.get('token', None)
-        if token is not None:
+        token = request.GET.get('token')
+        if token:
             email = get_email(token)
             user_id = User.objects.get(email=email).id
             for wish in Wish.objects.all():
